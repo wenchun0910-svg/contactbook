@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -490,6 +491,13 @@
                 const d = new Date(timestamp);
                 const pad = (n) => String(n).padStart(2, '0');
                 return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            },
+            getWeekdayStr: (dateStr) => {
+                if (!dateStr) return '';
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return '';
+                const weekdays = ['(日)', '(一)', '(二)', '(三)', '(四)', '(五)', '(六)'];
+                return weekdays[d.getDay()];
             }
         };
 
@@ -1034,7 +1042,9 @@
                             
                             <div class="flex justify-between items-start relative">
                                 <div class="w-full flex items-center gap-3 pr-12 flex-wrap sm:flex-nowrap">
-                                    <div class="text-lg text-ao font-bold font-serif whitespace-nowrap flex items-center">${entry.date}</div>
+                                    <div class="text-lg text-ao font-bold font-serif whitespace-nowrap flex items-center">
+                                        ${entry.date} <span class="ml-1 text-base font-medium opacity-90">${UI.getWeekdayStr(entry.date)}</span>
+                                    </div>
                                     <button onclick="App.showFullscreen('${entry.id}')" class="text-ao hover:text-white bg-ao/10 hover:bg-ao px-2 py-1 rounded text-xs font-bold transition flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-expand"></i> 全螢幕</button>
                                     
                                     <!-- 資訊列：自動推到最右側 -->
@@ -1065,6 +1075,9 @@
             showFullscreen: (id) => {
                 const baseEntry = State.entries.find(e => e.id === id);
                 if(!baseEntry) return;
+
+                document.getElementById('fs-date').textContent = `${baseEntry.date} ${UI.getWeekdayStr(baseEntry.date)}`;
+                document.getElementById('fs-author').textContent = baseEntry.authorName;
 
                 // 1. 取得被點選的該天日期
                 const baseDateStr = baseEntry.date;
@@ -1131,8 +1144,8 @@
                 // 使用 CSS Grid 實現左右雙欄 (大螢幕) / 上下排列 (手機平板)
                 fsContainer.className = "grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-10 items-stretch";
                 
-                const todayTitle = `${baseDateStr}`;
-                const tomorrowTitle = `${nextDateStr} <span class="text-xl md:text-2xl text-ao/60 ml-2">(明日)</span>`;
+                const todayTitle = `${baseDateStr} <span class="text-2xl md:text-3xl ml-1 font-medium opacity-90">${UI.getWeekdayStr(baseDateStr)}</span>`;
+                const tomorrowTitle = `${nextDateStr} <span class="text-2xl md:text-3xl ml-1 font-medium opacity-90">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-xl md:text-2xl text-ao/60 ml-2 font-normal">(明日)</span>`;
 
                 fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
                 
