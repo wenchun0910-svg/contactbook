@@ -503,7 +503,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-      const firebaseConfig = {
+         const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -745,6 +745,10 @@
             init: () => {
                 // 自動更新底部版權年份
                 document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+                // 預設：首頁載入時自動選取「今天」的日期
+                const d = new Date();
+                State.selectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
                 document.getElementById('btn-login-modal').addEventListener('click', () => UI.openModal('login-modal'));
                 document.getElementById('btn-logout').addEventListener('click', Auth.logout);
