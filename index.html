@@ -68,7 +68,10 @@
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-leaf text-2xl text-washi"></i>
-                <h1 class="text-2xl font-serif font-bold tracking-wider">和風學園 網路聯絡簿</h1>
+                <h1 class="text-2xl font-serif font-bold tracking-wider flex items-center gap-2">
+                    <span id="main-system-title">和風學園 網路聯絡簿</span>
+                    <button id="btn-edit-title" onclick="App.editSystemTitle()" class="hidden text-sm opacity-70 hover:opacity-100 transition"><i class="fa-solid fa-pen"></i></button>
+                </h1>
             </div>
             <div class="flex items-center gap-4">
                 <div id="user-info" class="hidden text-sm">
@@ -122,9 +125,15 @@
 
             <!-- Contact Book List -->
             <section>
-                <div class="flex justify-between items-end mb-4 border-b-2 border-matcha pb-2">
-                    <h2 class="text-2xl font-serif text-matcha"><i class="fa-solid fa-book-open mr-2"></i>最新聯絡簿</h2>
-                    <span id="current-filter-text" class="text-sm text-gray-500">顯示全部</span>
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 border-b-2 border-matcha pb-2 gap-2">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-2xl font-serif text-matcha"><i class="fa-solid fa-book-open mr-2"></i>今日交代功課</h2>
+                        <span id="current-filter-text" class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded hidden">顯示全部</span>
+                    </div>
+                    <div class="text-gray-500 text-[15px] flex gap-4 items-center font-sans tracking-wide">
+                        <span>最後更新：<span id="last-updated-text">--/--/-- --:--</span></span>
+                        <span>瀏覽人次：<span id="page-views-text" class="font-bold text-gray-700">0</span></span>
+                    </div>
                 </div>
                 <div id="entries-container" class="flex flex-col gap-4">
                     <!-- Entries injected here -->
@@ -195,15 +204,9 @@
             <div class="p-6 overflow-y-auto">
                 <form id="entry-form" class="space-y-4" onsubmit="event.preventDefault(); App.saveEntry();">
                     <input type="hidden" id="entry-id">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-bold mb-1 text-gray-700">日期</label>
-                            <input type="date" id="entry-date" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold mb-1 text-gray-700">標題</label>
-                            <input type="text" id="entry-title" required placeholder="如：10/24 聯絡事項" class="w-full p-2 border rounded focus:border-matcha focus:outline-none bg-white">
-                        </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-1 text-gray-700">日期</label>
+                        <input type="date" id="entry-date" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none bg-white">
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1 text-gray-700">標籤 (可複選)</label>
@@ -307,6 +310,16 @@
                         <input type="text" id="link-title" required placeholder="如：本學期行事曆" class="w-full p-2 border rounded">
                     </div>
                     <div>
+                        <label class="block text-sm font-bold mb-1 text-gray-700">標籤 (可複選)</label>
+                        <div id="link-tags-container" class="flex flex-wrap gap-2 p-2 border rounded bg-white min-h-[42px]">
+                            <!-- Checkboxes injected here -->
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-1 text-gray-700">發布期限 (選填，逾期自動隱藏)</label>
+                        <input type="date" id="link-expire-date" class="w-full p-2 border rounded bg-white focus:outline-none focus:border-matcha text-gray-700">
+                    </div>
+                    <div>
                         <label class="block text-sm font-bold mb-1">URL 網址</label>
                         <input type="url" id="link-url" required placeholder="https://..." class="w-full p-2 border rounded">
                     </div>
@@ -335,6 +348,7 @@
             links: [],
             tags: [],
             users: [],
+            system: null,
             searchQuery: '',
             selectedDate: null,
             currentCalendarDate: new Date()
@@ -370,13 +384,19 @@
                      .replace(/>/g, "&gt;")
                      .replace(/"/g, "&quot;")
                      .replace(/'/g, "&#039;");
+            },
+            formatDateTime: (timestamp) => {
+                if (!timestamp) return '--/--/-- --:--';
+                const d = new Date(timestamp);
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
             }
         };
 
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-       const firebaseConfig = {
+      const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -407,7 +427,7 @@
 
         // 本機模擬資料庫 (讓介面在無雲端庫狀態下仍可操作)
         const LocalDB = {
-            data: JSON.parse(localStorage.getItem('mock_school_db')) || { entries: [], links: [], tags: [], users: [] },
+            data: JSON.parse(localStorage.getItem('mock_school_db')) || { entries: [], links: [], tags: [], users: [], system: [] },
             listeners: {},
             save: function() { localStorage.setItem('mock_school_db', JSON.stringify(this.data)); },
             trigger: function(col) { if(this.listeners[col]) this.listeners[col]({ docs: this.data[col].map(d => ({ id: d.id, data: () => d })) }); },
@@ -536,6 +556,9 @@
                     document.getElementById('btn-manage-users').classList.toggle('hidden', !isAdmin);
                     document.getElementById('btn-manage-tags').classList.toggle('hidden', !isAdmin);
                     document.getElementById('btn-manage-links').classList.toggle('hidden', !isAdmin);
+                    
+                    const btnEditTitle = document.getElementById('btn-edit-title');
+                    if (btnEditTitle) btnEditTitle.classList.toggle('hidden', !isAdmin);
                 }
             },
             createUser: async () => {
@@ -611,6 +634,22 @@
                     }
                     App.renderUserList();
                 });
+
+                API.onSnapshot('system', async (snapshot) => {
+                    if (snapshot.docs.length === 0) {
+                        if (!window.systemInitLock) {
+                            window.systemInitLock = true;
+                            try { await API.addDoc('system', { title: '和風學園 網路聯絡簿', views: 1 }); } catch(e) {}
+                        }
+                    } else {
+                        State.system = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+                        if (!sessionStorage.getItem('has_viewed')) {
+                            sessionStorage.setItem('has_viewed', 'true');
+                            API.updateDoc('system', State.system.id, { views: (State.system.views || 0) + 1 });
+                        }
+                        App.renderSystem();
+                    }
+                });
             },
             
             saveEntry: async () => {
@@ -618,14 +657,13 @@
                 
                 const id = document.getElementById('entry-id').value;
                 const date = document.getElementById('entry-date').value;
-                const title = document.getElementById('entry-title').value;
                 const content = document.getElementById('entry-content').value;
                 
                 const tagCheckboxes = document.querySelectorAll('input[name="entry-tags"]:checked');
                 const selectedTags = Array.from(tagCheckboxes).map(cb => cb.value);
 
                 const data = {
-                    date, title, content, tags: selectedTags,
+                    date, content, tags: selectedTags,
                     authorId: State.currentUser.id,
                     authorName: State.currentUser.name,
                     timestamp: new Date().getTime()
@@ -650,7 +688,6 @@
                 
                 document.getElementById('entry-id').value = entry.id;
                 document.getElementById('entry-date').value = entry.date;
-                document.getElementById('entry-title').value = entry.title;
                 document.getElementById('entry-content').value = entry.content;
                 
                 document.querySelectorAll('input[name="entry-tags"]').forEach(cb => {
@@ -668,6 +705,23 @@
                     UI.showToast("刪除失敗", true);
                 }
             },
+            renderSystem: () => {
+                if (!State.system) return;
+                const titleEl = document.getElementById('main-system-title');
+                if (titleEl) titleEl.textContent = State.system.title || '和風學園 網路聯絡簿';
+                document.title = (State.system.title || '和風學園') + ' - 網路聯絡簿';
+                
+                const viewsEl = document.getElementById('page-views-text');
+                if (viewsEl) viewsEl.textContent = State.system.views || 0;
+            },
+            editSystemTitle: () => {
+                if (!State.currentUser || State.currentUser.role !== 'admin' || !State.system) return;
+                const newTitle = prompt("請輸入新的聯絡簿名稱：", State.system.title || '和風學園 網路聯絡簿');
+                if (newTitle && newTitle.trim() !== "") {
+                    API.updateDoc('system', State.system.id, { title: newTitle.trim() });
+                    UI.showToast("名稱已更新");
+                }
+            },
             renderEntries: () => {
                 const container = document.getElementById('entries-container');
                 let filtered = [...State.entries];
@@ -682,7 +736,7 @@
                 if (State.searchQuery) {
                     const q = State.searchQuery.toLowerCase();
                     filtered = filtered.filter(e => 
-                        e.title.toLowerCase().includes(q) || 
+                        (e.title && e.title.toLowerCase().includes(q)) || 
                         e.content.toLowerCase().includes(q)
                     );
                 }
@@ -690,12 +744,23 @@
                 // Apply Date Filter
                 if (State.selectedDate) {
                     filtered = filtered.filter(e => e.date === State.selectedDate);
-                    document.getElementById('current-filter-text').textContent = `篩選日期：${State.selectedDate}`;
+                    const filterText = document.getElementById('current-filter-text');
+                    filterText.textContent = `篩選日期：${State.selectedDate}`;
+                    filterText.classList.remove('hidden');
                     document.getElementById('btn-clear-filter').classList.remove('hidden');
                 } else {
-                    document.getElementById('current-filter-text').textContent = State.searchQuery ? `搜尋結果` : `顯示全部`;
+                    const filterText = document.getElementById('current-filter-text');
+                    filterText.textContent = State.searchQuery ? `搜尋結果` : `顯示全部`;
+                    if(State.searchQuery) filterText.classList.remove('hidden');
+                    else filterText.classList.add('hidden');
                     document.getElementById('btn-clear-filter').classList.add('hidden');
                 }
+
+                let latestTimestamp = 0;
+                if (State.entries.length > 0) {
+                    latestTimestamp = Math.max(...State.entries.map(e => e.timestamp || 0));
+                }
+                document.getElementById('last-updated-text').textContent = latestTimestamp ? UI.formatDateTime(latestTimestamp) : '--/--/-- --:--';
 
                 if (filtered.length === 0) {
                     container.innerHTML = `<div class="text-center py-10 text-gray-400">沒有符合的聯絡簿資料</div>`;
@@ -710,7 +775,7 @@
                     const entryTagsHtml = (entry.tags || []).map(tagId => {
                         const t = State.tags.find(x => x.id === tagId);
                         if(!t) return '';
-                        return `<span class="tag-badge" style="background-color: ${t.color}">${UI.escapeHtml(t.name)}</span>`;
+                        return `<span class="tag-badge whitespace-nowrap" style="background-color: ${t.color}">${UI.escapeHtml(t.name)}</span>`;
                     }).join(' ');
 
                     const formattedContent = UI.escapeHtml(entry.content).replace(/\n/g, '<br>');
@@ -720,23 +785,20 @@
                             <!-- left accent border -->
                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-matcha opacity-50"></div>
                             
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="text-matcha font-bold font-serif text-lg">${entry.date}</span>
-                                        ${entryTagsHtml}
-                                    </div>
-                                    <h3 class="text-xl font-bold text-sumi">${UI.escapeHtml(entry.title)}</h3>
+                            <div class="flex justify-between items-start relative">
+                                <div class="w-full flex items-center gap-3 pr-12">
+                                    ${entryTagsHtml ? `<div class="flex gap-1">${entryTagsHtml}</div>` : ''}
+                                    <div class="text-lg text-matcha font-bold font-serif">${entry.date}</div>
                                 </div>
                                 ${canEdit ? `
-                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition absolute right-0 top-0 bg-white bg-opacity-90 p-1 rounded">
                                     <button onclick="App.editEntry('${entry.id}')" class="text-gray-400 hover:text-matcha" title="修改"><i class="fa-solid fa-pen"></i></button>
                                     <button onclick="App.deleteEntry('${entry.id}')" class="text-gray-400 hover:text-sakura" title="刪除"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                                 ` : ''}
                             </div>
                             
-                            <div class="text-gray-700 leading-relaxed bg-washi p-4 rounded text-sm japanese-border">
+                            <div class="text-gray-700 leading-relaxed bg-washi p-4 rounded text-sm japanese-border mt-1">
                                 ${formattedContent}
                             </div>
                             
@@ -762,9 +824,13 @@
                 const title = document.getElementById('link-title').value;
                 let url = document.getElementById('link-url').value;
                 if (!url.startsWith('http')) url = 'https://' + url;
+                
+                const expireDate = document.getElementById('link-expire-date').value;
+                const tagCheckboxes = document.querySelectorAll('input[name="link-tags"]:checked');
+                const selectedTags = Array.from(tagCheckboxes).map(cb => cb.value);
 
                 try {
-                    await API.addDoc('links', { type, title, url, views: 0, timestamp: new Date().getTime() });
+                    await API.addDoc('links', { type, title, url, expireDate, tags: selectedTags, views: 0, timestamp: new Date().getTime() });
                     UI.showToast("新增資源成功");
                     UI.closeModal('link-modal');
                 } catch(e) { UI.showToast("新增失敗", true); }
@@ -786,27 +852,53 @@
                 const container = document.getElementById('links-container');
                 const isAdmin = !State.isGuest && State.currentUser.role === 'admin';
                 
-                if(State.links.length === 0) {
+                // 取得今天日期 (避免時區問題，使用當地時間組合)
+                const d = new Date();
+                const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                
+                // 過濾已過期的連結 (管理員仍可看到，用以維護刪除)
+                const visibleLinks = State.links.filter(link => {
+                    const isExpired = link.expireDate && link.expireDate < todayStr;
+                    if (isExpired && !isAdmin) return false;
+                    return true;
+                });
+                
+                if(visibleLinks.length === 0) {
                     container.innerHTML = `<div class="text-sm text-gray-400">目前沒有文件或網站</div>`;
                     return;
                 }
 
                 // Sort by timestamp desc
-                const sorted = [...State.links].sort((a,b) => b.timestamp - a.timestamp);
+                const sorted = [...visibleLinks].sort((a,b) => b.timestamp - a.timestamp);
 
                 container.innerHTML = sorted.map(link => {
                     const icon = link.type === 'document' ? 'fa-file-pdf text-sakura' : 'fa-globe text-wood';
+                    const isExpired = link.expireDate && link.expireDate < todayStr;
+                    
+                    // Render tags
+                    const linkTagsHtml = (link.tags || []).map(tagId => {
+                        const t = State.tags.find(x => x.id === tagId);
+                        if(!t) return '';
+                        return `<span class="tag-badge whitespace-nowrap" style="background-color: ${t.color}">${UI.escapeHtml(t.name)}</span>`;
+                    }).join(' ');
+
                     return `
-                        <div class="flex items-center justify-between p-3 border rounded hover:shadow-md transition bg-washi group">
+                        <div class="flex items-center justify-between p-3 border rounded hover:shadow-md transition ${isExpired ? 'bg-gray-100 opacity-60' : 'bg-washi'} group">
                             <button onclick="App.recordLinkView('${link.id}', '${link.url}')" class="flex items-center gap-3 flex-grow text-left">
                                 <i class="fa-solid ${icon} text-xl"></i>
                                 <div>
-                                    <div class="font-bold text-sumi text-sm">${UI.escapeHtml(link.title)}</div>
-                                    <div class="text-xs text-gray-500">觀看次數: ${link.views || 0}</div>
+                                    <div class="font-bold text-sumi text-sm flex items-center gap-2">
+                                        ${linkTagsHtml ? `<div class="flex gap-1">${linkTagsHtml}</div>` : ''}
+                                        <span>${UI.escapeHtml(link.title)} ${isExpired ? '<span class="text-xs text-red-500 font-normal ml-1">(已過期)</span>' : ''}</span>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-1 flex items-center gap-3">
+                                        <span>觀看次數: ${link.views || 0}</span>
+                                        ${link.expireDate ? `<span class="text-sakura"><i class="fa-regular fa-clock"></i> 期限至: ${link.expireDate}</span>` : ''}
+                                    </div>
                                 </div>
                             </button>
                             ${isAdmin ? `
-                                <button onclick="App.deleteLink('${link.id}')" class="text-gray-300 hover:text-sakura px-2 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash text-sm"></i></button>
+                                <button onclick="App.deleteLink('${link.id}')" class="text-gray-400 hover:text-sakura px-2 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash text-sm"></i></button>
                             ` : ''}
                         </div>
                     `;
@@ -830,17 +922,21 @@
                 catch(e) { UI.showToast("刪除失敗", true); }
             },
             renderTagCheckboxes: () => {
-                const container = document.getElementById('entry-tags-container');
-                if(!container) return;
-                container.innerHTML = State.tags.map(tag => `
+                const entryContainer = document.getElementById('entry-tags-container');
+                const linkContainer = document.getElementById('link-tags-container');
+                
+                const generateTagsHtml = (name) => State.tags.map(tag => `
                     <label class="inline-flex items-center gap-1 bg-gray-50 px-2 py-1 border rounded cursor-pointer hover:bg-gray-100">
-                        <input type="checkbox" name="entry-tags" value="${tag.id}" class="accent-matcha">
+                        <input type="checkbox" name="${name}" value="${tag.id}" class="accent-matcha">
                         <span class="text-sm flex items-center gap-1">
                             <span class="w-3 h-3 rounded-full inline-block" style="background-color:${tag.color}"></span>
                             ${UI.escapeHtml(tag.name)}
                         </span>
                     </label>
                 `).join('');
+
+                if(entryContainer) entryContainer.innerHTML = generateTagsHtml('entry-tags');
+                if(linkContainer) linkContainer.innerHTML = generateTagsHtml('link-tags');
             },
             renderManageTags: () => {
                 const container = document.getElementById('manage-tags-container');
