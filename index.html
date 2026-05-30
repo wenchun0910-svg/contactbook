@@ -132,26 +132,12 @@
                 </div>
             </section>
 
-            <!-- Search Bar -->
-            <section class="flex gap-2">
-                <div class="relative flex-grow">
-                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-                    <input type="text" id="search-input" placeholder="搜尋聯絡簿內容..." class="w-full pl-10 pr-4 py-2 rounded border border-gray-300 focus:outline-none focus:border-ao focus:ring-1 focus:ring-ao bg-white">
-                </div>
-                <button onclick="App.renderEntries()" class="bg-ao text-white px-6 rounded hover:bg-ao-dark transition">搜尋</button>
-                <button id="btn-clear-filter" onclick="App.clearFilters()" class="hidden bg-gray-400 text-white px-4 rounded hover:bg-gray-500 transition">清除篩選</button>
-            </section>
-
             <!-- Contact Book List -->
             <section>
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 border-b-2 border-ao pb-2 gap-2">
                     <div class="flex items-center gap-3">
                         <h2 class="text-2xl font-serif text-ao"><i class="fa-solid fa-book-open mr-2"></i>今日交代功課</h2>
                         <span id="current-filter-text" class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded hidden">顯示全部</span>
-                    </div>
-                    <div class="text-gray-500 text-[15px] flex gap-4 items-center font-sans tracking-wide">
-                        <span>最後更新：<span id="last-updated-text">--/--/-- --:--</span></span>
-                        <span>瀏覽人次：<span id="page-views-text" class="font-bold text-gray-700">0</span></span>
                     </div>
                 </div>
                 <div id="entries-container" class="flex flex-col gap-4">
@@ -161,23 +147,37 @@
             </section>
         </div>
 
-        <!-- Right Column: Calendar -->
+        <!-- Right Column: Sidebar (Info & Calendar) -->
         <div class="w-full md:w-1/3 lg:w-1/4">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden sticky top-4">
-                <div class="bg-sakura text-white p-3 flex justify-between items-center">
-                    <button onclick="Calendar.prevMonth()" class="hover:text-washi"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="calendar-month" class="font-serif font-bold text-lg">2023年 10月</h3>
-                    <button onclick="Calendar.nextMonth()" class="hover:text-washi"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-                <div class="p-4">
-                    <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-500 mb-2">
-                        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+            <div class="sticky top-4 flex flex-col gap-4">
+                
+                <!-- Info & Search Block -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                    <!-- System Stats -->
+                    <div class="text-gray-500 text-[13px] flex flex-wrap justify-between items-center font-sans tracking-wide mb-4 pb-3 border-b border-gray-100">
+                        <span>最後更新: <span id="last-updated-text" class="text-gray-600">--/--/-- --:--</span></span>
+                        <span>瀏覽人次: <span id="page-views-text" class="font-bold text-gray-700">0</span></span>
                     </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm">
-                        <!-- Calendar days injected here -->
+                    
+                    <!-- Search Bar -->
+                    <div class="flex gap-2">
+                        <div class="relative flex-grow">
+                            <i class="fa-solid fa-search absolute left-3 top-[10px] text-gray-400 text-sm"></i>
+                            <input type="text" id="search-input" placeholder="搜尋聯絡簿內容..." class="w-full pl-8 pr-2 py-1.5 text-sm rounded border border-gray-300 focus:outline-none focus:border-ao focus:ring-1 focus:ring-ao bg-white">
+                        </div>
+                        <button onclick="App.renderEntries()" class="bg-ao text-white px-3 py-1.5 text-sm rounded hover:bg-ao-dark transition whitespace-nowrap">搜尋</button>
                     </div>
+                    <button id="btn-clear-filter" onclick="App.clearFilters()" class="hidden w-full mt-2 bg-gray-400 text-white px-3 py-1.5 text-sm rounded hover:bg-gray-500 transition">清除篩選</button>
                 </div>
-                <div class="bg-gray-50 p-3 text-xs text-gray-500 border-t border-gray-100">
+
+                <!-- Calendar -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-sakura text-white p-3 flex justify-between items-center">
+                        <button onclick="Calendar.prevMonth()" class="hover:text-washi"><i class="fa-solid fa-chevron-left"></i></button>
+                        <h3 id="calendar-month" class="font-serif font-bold text-lg">2023年 10月</h3>
+                        <button onclick="Calendar.nextMonth()" class="hover:text-washi"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <div class="p-4">
                     <i class="fa-solid fa-circle text-ao mr-1 text-[8px]"></i>表示當日有聯絡簿<br>
                     點擊日期可篩選該日內容
                 </div>
@@ -187,7 +187,7 @@
     </main>
 
     <footer class="bg-sumi text-gray-400 text-center py-6 text-sm mt-auto">
-        <p>© 2026 和風學園網路聯絡簿系統. All rights reserved.</p>
+        <p>© <span id="footer-year">2026</span> <span id="footer-system-title">和風學園 網路聯絡簿</span>. All rights reserved.</p>
     </footer>
 
     <!-- Modals -->
@@ -492,7 +492,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-    const firebaseConfig = {
+  const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -731,6 +731,9 @@
         // Main App Logic
         window.App = {
             init: () => {
+                // 自動更新底部版權年份
+                document.getElementById('footer-year').textContent = new Date().getFullYear();
+
                 document.getElementById('btn-login-modal').addEventListener('click', () => UI.openModal('login-modal'));
                 document.getElementById('btn-logout').addEventListener('click', Auth.logout);
                 const btnPasswordModal = document.getElementById('btn-password-modal');
@@ -934,9 +937,16 @@
             },
             renderSystem: () => {
                 if (!State.system) return;
+                
+                const systemTitle = State.system.title || '和風學園 網路聯絡簿';
+                
                 const titleEl = document.getElementById('main-system-title');
-                if (titleEl) titleEl.textContent = State.system.title || '和風學園 網路聯絡簿';
-                document.title = (State.system.title || '和風學園') + ' - 網路聯絡簿';
+                if (titleEl) titleEl.textContent = systemTitle;
+                
+                const footerTitleEl = document.getElementById('footer-system-title');
+                if (footerTitleEl) footerTitleEl.textContent = systemTitle;
+                
+                document.title = systemTitle;
                 
                 const viewsEl = document.getElementById('page-views-text');
                 if (viewsEl) viewsEl.textContent = State.system.views || 0;
