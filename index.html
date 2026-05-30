@@ -17,8 +17,8 @@
                 extend: {
                     colors: {
                         'washi': '#F9F6F0',      // 和紙白
-                        'matcha': '#829079',     // 抹茶綠
-                        'matcha-dark': '#6b7a62',
+                        'ao': '#4A6984',         // 瑠璃青 (藍色主題)
+                        'ao-dark': '#324A60',    // 深藍色
                         'sakura': '#D9A0A0',     // 櫻花粉
                         'sakura-dark': '#c28585',
                         'sumi': '#333333',       // 墨黑
@@ -34,23 +34,23 @@
     </script>
     <style>
         body { background-color: #F9F6F0; color: #333333; }
-        .japanese-border { border: 2px solid #829079; border-radius: 4px; position: relative; }
+        .japanese-border { border: 2px solid #4A6984; border-radius: 4px; position: relative; }
         .japanese-border::after {
             content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px;
-            border: 1px solid rgba(130, 144, 121, 0.3); pointer-events: none;
+            border: 1px solid rgba(74, 105, 132, 0.3); pointer-events: none;
         }
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #F9F6F0; }
         ::-webkit-scrollbar-thumb { background: #A68A64; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #829079; }
+        ::-webkit-scrollbar-thumb:hover { background: #4A6984; }
         
         .modal { display: none; }
         .modal.active { display: flex; }
         
         .toast {
             position: fixed; bottom: 20px; right: 20px;
-            background: #829079; color: white; padding: 12px 24px;
+            background: #4A6984; color: white; padding: 12px 24px;
             border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
             z-index: 1000;
@@ -59,12 +59,28 @@
         .toast.error { background: #D9A0A0; }
         
         .tag-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; color: white; display: inline-block;}
+        
+        /* 編輯器相關樣式 */
+        #entry-content:empty:before {
+            content: attr(data-placeholder);
+            color: #9ca3af;
+            pointer-events: none;
+            display: block;
+        }
+        /* 修正 Tailwind 重置，讓文字編輯器的字體大小生效 */
+        font[size="1"] { font-size: 0.75em; }
+        font[size="2"] { font-size: 0.875em; }
+        font[size="3"] { font-size: 1em; }
+        font[size="4"] { font-size: 1.125em; }
+        font[size="5"] { font-size: 1.5em; }
+        font[size="6"] { font-size: 2em; }
+        font[size="7"] { font-size: 3em; }
     </style>
 </head>
 <body class="font-sans min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="bg-matcha text-washi shadow-md relative z-10">
+    <header class="bg-ao text-washi shadow-md relative z-10">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-leaf text-2xl text-washi"></i>
@@ -76,9 +92,9 @@
             <div class="flex items-center gap-4">
                 <div id="user-info" class="hidden text-sm">
                     <span id="welcome-msg" class="mr-2"></span>
-                    <span id="role-badge" class="bg-washi text-matcha px-2 py-1 rounded text-xs font-bold"></span>
+                    <span id="role-badge" class="bg-washi text-ao px-2 py-1 rounded text-xs font-bold"></span>
                 </div>
-                <button id="btn-login-modal" class="bg-washi text-matcha px-4 py-1.5 rounded-full hover:bg-opacity-90 transition shadow text-sm font-bold">
+                <button id="btn-login-modal" class="bg-washi text-ao px-4 py-1.5 rounded-full hover:bg-opacity-90 transition shadow text-sm font-bold">
                     登入管理
                 </button>
                 <button id="btn-password-modal" class="hidden bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full hover:bg-gray-300 transition shadow text-sm font-bold">
@@ -94,10 +110,10 @@
     <!-- Admin Toolbar (Hidden by default) -->
     <div id="admin-toolbar" class="hidden bg-wood text-washi shadow-sm">
         <div class="container mx-auto px-4 py-2 flex gap-4 text-sm overflow-x-auto">
-            <button onclick="UI.openModal('entry-modal')" class="hover:text-matcha transition flex items-center gap-1"><i class="fa-solid fa-plus"></i> 新增聯絡簿</button>
-            <button id="btn-manage-users" onclick="UI.openModal('user-modal')" class="hidden hover:text-matcha transition flex items-center gap-1"><i class="fa-solid fa-users"></i> 帳號管理</button>
-            <button id="btn-manage-tags" onclick="UI.openModal('tag-modal')" class="hidden hover:text-matcha transition flex items-center gap-1"><i class="fa-solid fa-tags"></i> 標籤管理</button>
-            <button id="btn-manage-links" onclick="UI.openModal('link-modal')" class="hidden hover:text-matcha transition flex items-center gap-1"><i class="fa-solid fa-link"></i> 新增資源/文件</button>
+            <button onclick="UI.openModal('entry-modal')" class="hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-plus"></i> 新增聯絡簿</button>
+            <button id="btn-manage-users" onclick="UI.openModal('user-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-users"></i> 帳號管理</button>
+            <button id="btn-manage-tags" onclick="UI.openModal('tag-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-tags"></i> 標籤管理</button>
+            <button id="btn-manage-links" onclick="UI.openModal('link-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-link"></i> 新增資源/文件</button>
         </div>
     </div>
 
@@ -120,17 +136,17 @@
             <section class="flex gap-2">
                 <div class="relative flex-grow">
                     <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-                    <input type="text" id="search-input" placeholder="搜尋聯絡簿內容..." class="w-full pl-10 pr-4 py-2 rounded border border-gray-300 focus:outline-none focus:border-matcha focus:ring-1 focus:ring-matcha bg-white">
+                    <input type="text" id="search-input" placeholder="搜尋聯絡簿內容..." class="w-full pl-10 pr-4 py-2 rounded border border-gray-300 focus:outline-none focus:border-ao focus:ring-1 focus:ring-ao bg-white">
                 </div>
-                <button onclick="App.renderEntries()" class="bg-matcha text-white px-6 rounded hover:bg-matcha-dark transition">搜尋</button>
+                <button onclick="App.renderEntries()" class="bg-ao text-white px-6 rounded hover:bg-ao-dark transition">搜尋</button>
                 <button id="btn-clear-filter" onclick="App.clearFilters()" class="hidden bg-gray-400 text-white px-4 rounded hover:bg-gray-500 transition">清除篩選</button>
             </section>
 
             <!-- Contact Book List -->
             <section>
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 border-b-2 border-matcha pb-2 gap-2">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 border-b-2 border-ao pb-2 gap-2">
                     <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-serif text-matcha"><i class="fa-solid fa-book-open mr-2"></i>今日交代功課</h2>
+                        <h2 class="text-2xl font-serif text-ao"><i class="fa-solid fa-book-open mr-2"></i>今日交代功課</h2>
                         <span id="current-filter-text" class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded hidden">顯示全部</span>
                     </div>
                     <div class="text-gray-500 text-[15px] flex gap-4 items-center font-sans tracking-wide">
@@ -162,7 +178,7 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 p-3 text-xs text-gray-500 border-t border-gray-100">
-                    <i class="fa-solid fa-circle text-matcha mr-1 text-[8px]"></i>表示當日有聯絡簿<br>
+                    <i class="fa-solid fa-circle text-ao mr-1 text-[8px]"></i>表示當日有聯絡簿<br>
                     點擊日期可篩選該日內容
                 </div>
             </div>
@@ -178,20 +194,20 @@
     
     <!-- Login Modal -->
     <div id="login-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center">
-        <div class="bg-washi p-8 rounded-lg shadow-xl w-full max-w-sm border-t-4 border-matcha">
+        <div class="bg-washi p-8 rounded-lg shadow-xl w-full max-w-sm border-t-4 border-ao">
             <h2 class="text-2xl font-serif text-center mb-6 text-sumi">系統登入</h2>
             <form id="login-form" class="space-y-4" onsubmit="event.preventDefault(); Auth.login();">
                 <div>
                     <label class="block text-sm font-bold mb-1 text-gray-700">帳號</label>
-                    <input type="text" id="login-username" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none">
+                    <input type="text" id="login-username" required class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-bold mb-1 text-gray-700">密碼</label>
-                    <input type="password" id="login-password" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none">
+                    <input type="password" id="login-password" required class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                 </div>
                 <div class="flex gap-2 pt-4">
                     <button type="button" onclick="UI.closeModal('login-modal')" class="w-1/3 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition">取消</button>
-                    <button type="submit" class="w-2/3 bg-matcha text-white py-2 rounded hover:bg-matcha-dark transition">登入</button>
+                    <button type="submit" class="w-2/3 bg-ao text-white py-2 rounded hover:bg-ao-dark transition">登入</button>
                 </div>
             </form>
         </div>
@@ -199,7 +215,7 @@
 
     <!-- Entry Modal (Add/Edit) -->
     <div id="entry-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
-        <div class="bg-washi rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border-t-4 border-matcha">
+        <div class="bg-washi rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col border-t-4 border-ao">
             <div class="p-4 border-b flex justify-between items-center bg-white">
                 <h2 id="entry-modal-title" class="text-xl font-serif text-sumi font-bold">新增聯絡簿</h2>
                 <button onclick="UI.closeModal('entry-modal')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-times text-xl"></i></button>
@@ -209,7 +225,7 @@
                     <input type="hidden" id="entry-id">
                     <div>
                         <label class="block text-sm font-bold mb-1 text-gray-700">日期</label>
-                        <input type="date" id="entry-date" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none bg-white">
+                        <input type="date" id="entry-date" required class="w-full p-2 border rounded focus:border-ao focus:outline-none bg-white">
                     </div>
                     <div>
                         <label id="entry-tag-label" class="block text-sm font-bold mb-1 text-gray-700">點擊標籤，即可插入至下方內容中</label>
@@ -218,14 +234,60 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold mb-1 text-gray-700">內容 (支援多行)</label>
-                        <textarea id="entry-content" required rows="6" class="w-full p-2 border rounded focus:border-matcha focus:outline-none bg-white" placeholder="如：&#10;1. 數卷x1&#10;2. 國生字"></textarea>
+                        <label class="block text-sm font-bold mb-1 text-gray-700">內容 (支援多行與格式)</label>
+                        
+                        <!-- 簡易文字編輯器工具列 -->
+                        <div class="flex flex-wrap gap-2 mb-2 p-1.5 border rounded bg-gray-50 items-center">
+                            <select onchange="document.execCommand('fontSize', false, this.value); this.selectedIndex=0;" class="border rounded px-2 py-1 text-sm focus:outline-none focus:border-ao cursor-pointer">
+                                <option value="">字體大小</option>
+                                <option value="3">一般</option>
+                                <option value="5">大</option>
+                                <option value="7">特大</option>
+                            </select>
+                            <div class="flex items-center gap-1 bg-white border rounded px-1">
+                                <span class="text-xs text-gray-500 pl-1">顏色:</span>
+                                <input type="color" onchange="document.execCommand('foreColor', false, this.value)" title="文字顏色" class="w-7 h-7 p-0 border-0 cursor-pointer rounded bg-transparent">
+                            </div>
+                            <div class="h-6 w-px bg-gray-300 mx-1"></div>
+                            <button type="button" onclick="document.execCommand('bold', false, null)" class="w-8 h-8 flex items-center justify-center bg-white border hover:bg-gray-100 rounded font-bold text-gray-700 transition" title="粗體">B</button>
+                            <button type="button" onclick="document.execCommand('italic', false, null)" class="w-8 h-8 flex items-center justify-center bg-white border hover:bg-gray-100 rounded italic text-gray-700 transition" title="斜體">I</button>
+                            <button type="button" onclick="document.execCommand('underline', false, null)" class="w-8 h-8 flex items-center justify-center bg-white border hover:bg-gray-100 rounded underline text-gray-700 transition" title="底線">U</button>
+                        </div>
+                        <!-- 取代原本的 textarea，改用 contenteditable 讓排版生效 -->
+                        <div id="entry-content" contenteditable="true" data-placeholder="如：&#10;1. 數卷x1&#10;2. 國生字" class="w-full p-3 border rounded focus:border-ao focus:outline-none bg-white min-h-[200px] overflow-y-auto" style="line-height: 1.6;"></div>
                     </div>
                     <div class="flex justify-end gap-3 pt-2">
                         <button type="button" onclick="UI.closeModal('entry-modal')" class="bg-gray-300 text-gray-700 px-6 py-2 rounded hover:bg-gray-400 transition">取消</button>
-                        <button type="submit" class="bg-matcha text-white px-6 py-2 rounded hover:bg-matcha-dark transition">儲存</button>
+                        <button type="submit" class="bg-ao text-white px-6 py-2 rounded hover:bg-ao-dark transition">儲存</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Presentation Modal -->
+    <div id="fullscreen-modal" class="modal fixed inset-0 bg-washi z-[100] flex-col overflow-y-auto">
+        <div class="sticky top-0 bg-ao text-white p-4 shadow-md flex justify-between items-center z-10">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-expand text-xl"></i>
+                <h2 class="text-xl md:text-2xl font-serif font-bold tracking-wider">聯絡簿全螢幕展示</h2>
+            </div>
+            <button onclick="UI.closeModal('fullscreen-modal')" class="text-white hover:bg-white/20 transition px-4 py-2 rounded-full font-bold flex items-center gap-2 border border-white/30">
+                <i class="fa-solid fa-times"></i> 關閉全螢幕
+            </button>
+        </div>
+        <div class="container mx-auto px-4 py-8 md:py-12 max-w-5xl pb-20">
+            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-14 border-2 border-ao">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b-2 border-gray-100">
+                    <div class="text-3xl md:text-5xl text-ao font-bold font-serif mb-4 md:mb-0" id="fs-date"></div>
+                    <div class="text-gray-500 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-user-pen"></i> <span id="fs-author"></span>
+                    </div>
+                </div>
+                <!-- 展示內容區域 -->
+                <div id="fs-content" class="text-xl md:text-3xl text-gray-800 font-sans" style="line-height: 1.8;">
+                    <!-- Content Injected here -->
+                </div>
             </div>
         </div>
     </div>
@@ -242,10 +304,10 @@
                 <div class="w-full md:w-1/3 bg-white p-4 rounded border">
                     <h3 class="font-bold mb-3 text-sm text-gray-600">新增帳號</h3>
                     <form id="user-form" class="space-y-3" onsubmit="event.preventDefault(); Auth.createUser();">
-                        <input type="text" id="new-user-account" placeholder="登入帳號" required class="w-full p-2 border rounded text-sm">
-                        <input type="password" id="new-user-pass" placeholder="密碼" required class="w-full p-2 border rounded text-sm">
-                        <input type="text" id="new-user-name" placeholder="顯示名稱 (如: 王老師)" required class="w-full p-2 border rounded text-sm">
-                        <select id="new-user-role" class="w-full p-2 border rounded text-sm">
+                        <input type="text" id="new-user-account" placeholder="登入帳號" required class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none">
+                        <input type="password" id="new-user-pass" placeholder="密碼" required class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none">
+                        <input type="text" id="new-user-name" placeholder="顯示名稱 (如: 王老師)" required class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none">
+                        <select id="new-user-role" class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none">
                             <option value="collaborator">協作者 (僅能管理自己內容)</option>
                             <option value="admin">管理員 (全部權限)</option>
                         </select>
@@ -281,8 +343,8 @@
             </div>
             <div class="p-6">
                 <form id="tag-form" class="flex gap-2 mb-6" onsubmit="event.preventDefault(); App.addTag();">
-                    <input type="text" id="new-tag-name" placeholder="標籤名稱 (例:重要)" required class="flex-grow p-2 border rounded">
-                    <input type="color" id="new-tag-color" value="#D9A0A0" class="p-1 border rounded h-10 w-12 cursor-pointer">
+                    <input type="text" id="new-tag-name" placeholder="標籤名稱 (例:重要)" required class="flex-grow p-2 border rounded focus:border-ao focus:outline-none">
+                    <input type="color" id="new-tag-color" value="#D9A0A0" class="p-1 border rounded h-10 w-12 cursor-pointer focus:border-ao focus:outline-none">
                     <button type="submit" class="bg-sakura text-white px-4 rounded hover:bg-sakura-dark">新增</button>
                 </form>
                 <div id="manage-tags-container" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto">
@@ -303,14 +365,14 @@
                 <form id="link-form" class="space-y-4" onsubmit="event.preventDefault(); App.addLink();">
                     <div>
                         <label class="block text-sm font-bold mb-1">類型</label>
-                        <select id="link-type" class="w-full p-2 border rounded">
+                        <select id="link-type" class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                             <option value="document">文件 (Document)</option>
                             <option value="website">網站 (Website)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1">標題</label>
-                        <input type="text" id="link-title" required placeholder="如：本學期行事曆" class="w-full p-2 border rounded">
+                        <input type="text" id="link-title" required placeholder="如：本學期行事曆" class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1 text-gray-700">標籤 (可複選)</label>
@@ -320,11 +382,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1 text-gray-700">發布期限 (選填，逾期自動隱藏)</label>
-                        <input type="date" id="link-expire-date" class="w-full p-2 border rounded bg-white focus:outline-none focus:border-matcha text-gray-700">
+                        <input type="date" id="link-expire-date" class="w-full p-2 border rounded bg-white focus:outline-none focus:border-ao text-gray-700">
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1">URL 網址</label>
-                        <input type="url" id="link-url" required placeholder="https://..." class="w-full p-2 border rounded">
+                        <input type="url" id="link-url" required placeholder="https://..." class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                     </div>
                     <div class="flex justify-end pt-2">
                         <button type="submit" class="bg-wood text-white px-6 py-2 rounded hover:bg-opacity-90 transition">新增</button>
@@ -336,24 +398,24 @@
 
     <!-- Password Modal -->
     <div id="password-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
-        <div class="bg-washi p-8 rounded-lg shadow-xl w-full max-w-sm border-t-4 border-matcha">
+        <div class="bg-washi p-8 rounded-lg shadow-xl w-full max-w-sm border-t-4 border-ao">
             <h2 class="text-2xl font-serif text-center mb-6 text-sumi">修改密碼</h2>
             <form id="password-form" class="space-y-4" onsubmit="event.preventDefault(); Auth.changePassword();">
                 <div>
                     <label class="block text-sm font-bold mb-1 text-gray-700">原密碼</label>
-                    <input type="password" id="old-password" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none">
+                    <input type="password" id="old-password" required class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-bold mb-1 text-gray-700">新密碼</label>
-                    <input type="password" id="new-password" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none">
+                    <input type="password" id="new-password" required class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                 </div>
                 <div>
                     <label class="block text-sm font-bold mb-1 text-gray-700">確認新密碼</label>
-                    <input type="password" id="confirm-password" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none">
+                    <input type="password" id="confirm-password" required class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                 </div>
                 <div class="flex gap-2 pt-4">
                     <button type="button" onclick="UI.closeModal('password-modal')" class="w-1/3 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition">取消</button>
-                    <button type="submit" class="w-2/3 bg-matcha text-white py-2 rounded hover:bg-matcha-dark transition">確認修改</button>
+                    <button type="submit" class="w-2/3 bg-ao text-white py-2 rounded hover:bg-ao-dark transition">確認修改</button>
                 </div>
             </form>
         </div>
@@ -394,11 +456,16 @@
                 document.getElementById(id).classList.add('active');
                 if(id === 'entry-modal' && !document.getElementById('entry-id').value) {
                     document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
+                    document.getElementById('entry-content').innerHTML = '';
+                    document.getElementById('entry-content').focus();
                 }
             },
             closeModal: (id) => {
                 document.getElementById(id).classList.remove('active');
-                if(id === 'entry-modal') document.getElementById('entry-form').reset();
+                if(id === 'entry-modal') {
+                    document.getElementById('entry-form').reset();
+                    document.getElementById('entry-content').innerHTML = ''; // 清空編輯器
+                }
                 if(id === 'login-modal') document.getElementById('login-form').reset();
                 if(id === 'password-modal') document.getElementById('password-form').reset();
                 if(id === 'tag-modal') document.getElementById('tag-form').reset();
@@ -425,7 +492,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-   const firebaseConfig = {
+    const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -722,16 +789,64 @@
                 });
             },
 
+            // 處理內容標籤渲染 (共用於列表與全螢幕)
+            formatContentWithTags: (rawContent) => {
+                let content = rawContent || '';
+                // 兼容舊版純文字：如果沒有任何 HTML 排版標籤，則將換行符號轉為 <br>
+                if (!/<div>|<br>|<p>|<span>|<font>/i.test(content)) {
+                    content = UI.escapeHtml(content).replace(/\n/g, '<br>');
+                }
+                
+                State.tags.forEach(t => {
+                    const safeTagName = UI.escapeHtml(t.name);
+                    const badgeHtml = `<span class="tag-badge whitespace-nowrap mx-1 relative -top-[1px] shadow-sm align-middle" style="background-color: ${t.color}; font-size: 0.85em; padding: 4px 10px;">${safeTagName}</span>`;
+                    const regex = new RegExp(`【${safeTagName}】`, 'g');
+                    content = content.replace(regex, badgeHtml);
+                });
+                return content;
+            },
+
             insertTagToContent: (tagName) => {
-                const textarea = document.getElementById('entry-content');
+                const editor = document.getElementById('entry-content');
                 const insertText = `【${tagName}】`;
-                const startPos = textarea.selectionStart;
-                const endPos = textarea.selectionEnd;
-                const text = textarea.value;
-                textarea.value = text.substring(0, startPos) + insertText + text.substring(endPos);
-                textarea.selectionStart = startPos + insertText.length;
-                textarea.selectionEnd = startPos + insertText.length;
-                textarea.focus();
+                
+                editor.focus();
+                
+                // 使用現代 Selection API 來在游標處插入
+                const selection = window.getSelection();
+                if (selection.getRangeAt && selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    
+                    // 確保游標真的在編輯器裡面
+                    let isInside = false;
+                    let node = range.commonAncestorContainer;
+                    while(node) {
+                        if (node === editor) { isInside = true; break; }
+                        node = node.parentNode;
+                    }
+                    
+                    if (isInside) {
+                        range.deleteContents();
+                        const textNode = document.createTextNode(insertText);
+                        range.insertNode(textNode);
+                        
+                        // 將游標移到插入的標籤後方
+                        range.setStartAfter(textNode);
+                        range.setEndAfter(textNode);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                        return;
+                    }
+                }
+                
+                // 若找不到焦點則直接加在最後面
+                editor.appendChild(document.createTextNode(insertText));
+                
+                const newRange = document.createRange();
+                newRange.selectNodeContents(editor);
+                newRange.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(newRange);
             },
             
             saveEntry: async () => {
@@ -739,7 +854,8 @@
                 
                 const id = document.getElementById('entry-id').value;
                 const date = document.getElementById('entry-date').value;
-                const content = document.getElementById('entry-content').value;
+                // 從 HTML 編輯器取得內容
+                const content = document.getElementById('entry-content').innerHTML; 
                 
                 // 自動解析內容中包含哪些標籤，存入資料庫以供未來搜尋或篩選使用
                 const selectedTags = State.tags
@@ -772,7 +888,8 @@
                 
                 document.getElementById('entry-id').value = entry.id;
                 document.getElementById('entry-date').value = entry.date;
-                document.getElementById('entry-content').value = entry.content;
+                // 讀取回編輯器
+                document.getElementById('entry-content').innerHTML = entry.content;
                 
                 UI.openModal('entry-modal');
                 document.getElementById('entry-modal-title').textContent = "修改聯絡簿";
@@ -851,19 +968,10 @@
                     // Check permissions
                     const canEdit = !State.isGuest && (State.currentUser.role === 'admin' || State.currentUser.id === entry.authorId);
 
-                    // 安全地處理文字與換行
-                    let formattedContent = UI.escapeHtml(entry.content).replace(/\n/g, '<br>');
+                    // 呼叫統一的格式化工具 (處理 HTML 及 動態標籤)
+                    const formattedContent = App.formatContentWithTags(entry.content);
                     
-                    // 動態將內容中的【標籤】替換為彩色 Badge
-                    State.tags.forEach(t => {
-                        const safeTagName = UI.escapeHtml(t.name);
-                        const badgeHtml = `<span class="tag-badge whitespace-nowrap mx-1 relative -top-[1px]" style="background-color: ${t.color}">${safeTagName}</span>`;
-                        // 使用全域替換 (正則表達式)
-                        const regex = new RegExp(`【${safeTagName}】`, 'g');
-                        formattedContent = formattedContent.replace(regex, badgeHtml);
-                    });
-                    
-                    // 處理舊資料相容性 (如果原本有標籤但沒打在文字裡的，預設顯示在最前方)
+                    // 處理舊資料相容性 (如果原本有勾選標籤但沒打在文字裡的，預設顯示在最前方)
                     let legacyTagsHtml = '';
                     (entry.tags || []).forEach(tagId => {
                         const t = State.tags.find(x => x.id === tagId);
@@ -875,15 +983,16 @@
                     return `
                         <article class="bg-white p-5 rounded-lg shadow-sm border border-gray-100 flex flex-col gap-3 relative overflow-hidden group">
                             <!-- left accent border -->
-                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-matcha opacity-50"></div>
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-ao opacity-50"></div>
                             
                             <div class="flex justify-between items-start relative">
                                 <div class="w-full flex items-center gap-3 pr-12">
-                                    <div class="text-lg text-matcha font-bold font-serif">${entry.date}</div>
+                                    <div class="text-lg text-ao font-bold font-serif">${entry.date}</div>
+                                    <button onclick="App.showFullscreen('${entry.id}')" class="text-ao hover:text-white bg-ao/10 hover:bg-ao px-2 py-1 rounded text-xs font-bold transition flex items-center gap-1"><i class="fa-solid fa-expand"></i> 全螢幕</button>
                                 </div>
                                 ${canEdit ? `
                                 <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition absolute right-0 top-0 bg-white bg-opacity-90 p-1 rounded">
-                                    <button onclick="App.editEntry('${entry.id}')" class="text-gray-400 hover:text-matcha" title="修改"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="App.editEntry('${entry.id}')" class="text-gray-400 hover:text-ao" title="修改"><i class="fa-solid fa-pen"></i></button>
                                     <button onclick="App.deleteEntry('${entry.id}')" class="text-gray-400 hover:text-sakura" title="刪除"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                                 ` : ''}
@@ -899,6 +1008,26 @@
                         </article>
                     `;
                 }).join('');
+            },
+            showFullscreen: (id) => {
+                const entry = State.entries.find(e => e.id === id);
+                if(!entry) return;
+
+                document.getElementById('fs-date').textContent = entry.date;
+                document.getElementById('fs-author').textContent = entry.authorName;
+                
+                // 處理相容性標籤與內容
+                const formattedContent = App.formatContentWithTags(entry.content);
+                let legacyTagsHtml = '';
+                (entry.tags || []).forEach(tagId => {
+                    const t = State.tags.find(x => x.id === tagId);
+                    if(t && !entry.content.includes(`【${t.name}】`)) {
+                        legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-2 relative -top-[2px]" style="background-color: ${t.color}; font-size: 0.6em; padding: 6px 12px;">${UI.escapeHtml(t.name)}</span>`;
+                    }
+                });
+
+                document.getElementById('fs-content').innerHTML = legacyTagsHtml + formattedContent;
+                UI.openModal('fullscreen-modal');
             },
             clearFilters: () => {
                 State.selectedDate = null;
@@ -1032,7 +1161,7 @@
                 if(linkContainer) {
                     linkContainer.innerHTML = State.tags.map(tag => `
                         <label class="inline-flex items-center gap-1 bg-gray-50 px-2 py-1 border rounded cursor-pointer hover:bg-gray-100">
-                            <input type="checkbox" name="link-tags" value="${tag.id}" class="accent-matcha">
+                            <input type="checkbox" name="link-tags" value="${tag.id}" class="accent-ao">
                             <span class="text-sm flex items-center gap-1 text-gray-700">
                                 <span class="w-3 h-3 rounded-full inline-block" style="background-color:${tag.color}"></span>
                                 ${UI.escapeHtml(tag.name)}
@@ -1069,7 +1198,7 @@
                             </span>
                         </td>
                         <td class="p-2 text-right">
-                            <button onclick="Auth.resetUserPassword('${u.id}')" class="text-matcha hover:text-matcha-dark text-sm mr-3" title="重設密碼"><i class="fa-solid fa-key"></i></button>
+                            <button onclick="Auth.resetUserPassword('${u.id}')" class="text-ao hover:text-ao-dark text-sm mr-3" title="重設密碼"><i class="fa-solid fa-key"></i></button>
                             <button onclick="Auth.deleteUser('${u.id}')" class="text-sakura hover:text-sakura-dark text-sm" title="刪除帳號"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
@@ -1108,15 +1237,15 @@
                     // Check if entry exists for this date
                     const hasEntry = State.entries.some(e => e.date === cellDateStr);
                     
-                    let classes = `p-2 rounded cursor-pointer transition relative hover:bg-matcha hover:text-white `;
-                    if (isSelected) classes += `bg-matcha text-white font-bold `;
-                    else if (isToday) classes += `bg-washi border border-matcha text-matcha font-bold `;
+                    let classes = `p-2 rounded cursor-pointer transition relative hover:bg-ao hover:text-white `;
+                    if (isSelected) classes += `bg-ao text-white font-bold `;
+                    else if (isToday) classes += `bg-washi border border-ao text-ao font-bold `;
                     else classes += `text-gray-700 `;
 
                     html += `
                         <div class="${classes}" onclick="Calendar.selectDate('${cellDateStr}')">
                             ${i}
-                            ${hasEntry ? `<div class="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-matcha rounded-full ${isSelected||isToday ? 'bg-white' : ''}"></div>` : ''}
+                            ${hasEntry ? `<div class="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-ao rounded-full ${isSelected||isToday ? 'bg-white' : ''}"></div>` : ''}
                         </div>
                     `;
                 }
