@@ -324,32 +324,12 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Configuration (Sandbox Environment)
-        const firebaseConfig = {
-  apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
-  authDomain: "contactbook-c6d95.firebaseapp.com",
-  projectId: "contactbook-c6d95",
-  storageBucket: "contactbook-c6d95.firebasestorage.app",
-  messagingSenderId: "655576113880",
-  appId: "1:655576113880:web:15606f5cad291d8aca6dad"
-};
-            // Mock config for local testing if needed
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'school-contact-book';
-
-        // Helper to get correct path for public collections
-        const getColRef = (colName) => collection(db, 'artifacts', APP_ID, 'public', 'data', colName);
-        const getDocRef = (colName, docId) => doc(db, 'artifacts', APP_ID, 'public', 'data', colName, docId);
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global State
         window.State = {
-            currentUser: null, // Custom user profile { id, account, role, name }
+            currentUser: null,
             isGuest: true,
             entries: [],
             links: [],
@@ -393,30 +373,122 @@
             }
         };
 
-        // Authentication & User Management (Mocking RBAC via Custom Collection to avoid Admin SDK requirement)
+        // =========================================================
+        // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
+        // =========================================================
+       const firebaseConfig = {
+  apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
+  authDomain: "contactbook-c6d95.firebaseapp.com",
+  projectId: "contactbook-c6d95",
+  storageBucket: "contactbook-c6d95.firebasestorage.app",
+  messagingSenderId: "655576113880",
+  appId: "1:655576113880:web:15606f5cad291d8aca6dad"
+};
+        // =========================================================
+
+        let app, auth, db;
+        let useMockDB = false;
+        
+        try {
+            // 檢查是否有填寫 apiKey，若無則使用本機模擬模式 (Local Storage)
+            if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "您的 API KEY") {
+                useMockDB = true;
+                console.log("⚠️ 未檢測到有效的 Firebase 金鑰，已啟用【本機模擬資料庫模式】");
+            } else {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                console.log("✅ Firebase 初始化成功！");
+            }
+        } catch (e) {
+            useMockDB = true;
+            console.error("Firebase 初始化發生錯誤，已切換回本機模擬模式:", e);
+        }
+
+        // 本機模擬資料庫 (讓介面在無雲端庫狀態下仍可操作)
+        const LocalDB = {
+            data: JSON.parse(localStorage.getItem('mock_school_db')) || { entries: [], links: [], tags: [], users: [] },
+            listeners: {},
+            save: function() { localStorage.setItem('mock_school_db', JSON.stringify(this.data)); },
+            trigger: function(col) { if(this.listeners[col]) this.listeners[col]({ docs: this.data[col].map(d => ({ id: d.id, data: () => d })) }); },
+            add: async function(col, docData) { 
+                const id = Math.random().toString(36).substr(2, 9);
+                this.data[col].push({ id, ...docData });
+                this.save(); this.trigger(col);
+                return { id };
+            },
+            update: async function(col, id, docData) {
+                const idx = this.data[col].findIndex(d => d.id === id);
+                if(idx > -1) { this.data[col][idx] = { ...this.data[col][idx], ...docData }; this.save(); this.trigger(col); }
+            },
+            delete: async function(col, id) {
+                this.data[col] = this.data[col].filter(d => d.id !== id);
+                this.save(); this.trigger(col);
+            }
+        };
+
+        // 資料庫 API 封裝 (自動判斷要用 Firebase 還是 LocalDB)
+        window.API = {
+            onSnapshot: (colName, cb) => {
+                if (useMockDB) {
+                    LocalDB.listeners[colName] = cb;
+                    setTimeout(() => LocalDB.trigger(colName), 0);
+                } else {
+                    // 已修正為標準的 Firebase 根目錄結構 (不再使用沙盒專屬結構)
+                    onSnapshot(collection(db, colName), cb, (err) => console.error("Firestore 讀取錯誤:", err));
+                }
+            },
+            addDoc: async (colName, data) => {
+                if (useMockDB) return LocalDB.add(colName, data);
+                else return addDoc(collection(db, colName), data);
+            },
+            updateDoc: async (colName, id, data) => {
+                if (useMockDB) return LocalDB.update(colName, id, data);
+                else return updateDoc(doc(db, colName, id), data);
+            },
+            deleteDoc: async (colName, id) => {
+                if (useMockDB) return LocalDB.delete(colName, id);
+                else return deleteDoc(doc(db, colName, id));
+            }
+        };
+
+        // Authentication & User Management
         window.Auth = {
             init: async () => {
-                try {
-                    // Always sign in anonymously to satisfy Firebase rules for read/write
-                    await signInAnonymously(auth);
-                    
-                    // Check local storage for session (simulating persistent login in custom system)
-                    const sessionData = sessionStorage.getItem('school_app_session');
-                    if(sessionData) {
-                        State.currentUser = JSON.parse(sessionData);
-                        State.isGuest = false;
+                if (!useMockDB) {
+                    try { 
+                        // 需要在 Firebase 後台開啟 "匿名登入"
+                        await signInAnonymously(auth); 
+                    } catch (e) { 
+                        console.error("Firebase 匿名登入失敗，請確認是否於後台啟用匿名登入功能", e); 
                     }
-                    Auth.updateUI();
-                } catch (e) {
-                    console.error("Auth init failed:", e);
-                    UI.showToast("系統初始化失敗", true);
                 }
+                
+                // 檢查登入狀態
+                const sessionData = sessionStorage.getItem('school_app_session');
+                if(sessionData) {
+                    State.currentUser = JSON.parse(sessionData);
+                    State.isGuest = false;
+                }
+                Auth.updateUI();
             },
             login: () => {
                 const acc = document.getElementById('login-username').value;
                 const pass = document.getElementById('login-password').value;
                 
-                // Find user in fetched users array
+                // 保底管理員帳號：若資料庫尚未建置任何帳號時使用
+                if (State.users.length === 0 && acc === 'admin' && pass === 'admin') {
+                    State.currentUser = { id: 'admin-1', account: 'admin', role: 'admin', name: '系統管理員' };
+                    State.isGuest = false;
+                    sessionStorage.setItem('school_app_session', JSON.stringify(State.currentUser));
+                    UI.closeModal('login-modal');
+                    UI.showToast(`歡迎回來，系統管理員`);
+                    Auth.updateUI();
+                    App.renderEntries();
+                    return;
+                }
+
+                // 比對帳號密碼
                 const user = State.users.find(u => u.account === acc && u.password === pass);
                 if (user) {
                     State.currentUser = { id: user.id, account: user.account, role: user.role, name: user.name };
@@ -425,7 +497,7 @@
                     UI.closeModal('login-modal');
                     UI.showToast(`歡迎回來，${user.name}`);
                     Auth.updateUI();
-                    App.renderEntries(); // Re-render to show edit/delete buttons
+                    App.renderEntries();
                 } else {
                     UI.showToast("帳號或密碼錯誤", true);
                 }
@@ -458,7 +530,6 @@
                     document.getElementById('welcome-msg').textContent = State.currentUser.name;
                     const badge = document.getElementById('role-badge');
                     
-                    // Role based UI
                     const isAdmin = State.currentUser.role === 'admin';
                     badge.textContent = isAdmin ? '管理員' : '協作者';
                     
@@ -480,7 +551,7 @@
                 }
 
                 try {
-                    await addDoc(getColRef('users'), { account: acc, password: pass, name, role });
+                    await API.addDoc('users', { account: acc, password: pass, name, role });
                     UI.showToast("帳號新增成功");
                     document.getElementById('user-form').reset();
                 } catch(e) {
@@ -492,7 +563,7 @@
                 if(State.currentUser.id === id) return UI.showToast("無法刪除自己", true);
                 
                 try {
-                    await deleteDoc(getDocRef('users', id));
+                    await API.deleteDoc('users', id);
                     UI.showToast("帳號已刪除");
                 } catch(e) {
                     UI.showToast("刪除失敗", true);
@@ -503,7 +574,6 @@
         // Main App Logic
         window.App = {
             init: () => {
-                // Attach event listeners
                 document.getElementById('btn-login-modal').addEventListener('click', () => UI.openModal('login-modal'));
                 document.getElementById('btn-logout').addEventListener('click', Auth.logout);
                 document.getElementById('search-input').addEventListener('input', (e) => {
@@ -514,44 +584,35 @@
                 App.startListeners();
             },
             startListeners: () => {
-                // Listen to Entries
-                onSnapshot(getColRef('entries'), (snapshot) => {
+                API.onSnapshot('entries', (snapshot) => {
                     State.entries = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
                     App.renderEntries();
-                    Calendar.render(); // Re-render calendar to show dots
-                }, (error) => console.error("Error fetching entries:", error));
+                    Calendar.render();
+                });
 
-                // Listen to Links
-                onSnapshot(getColRef('links'), (snapshot) => {
+                API.onSnapshot('links', (snapshot) => {
                     State.links = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
                     App.renderLinks();
-                }, (error) => console.error("Error fetching links:", error));
+                });
 
-                // Listen to Tags
-                onSnapshot(getColRef('tags'), (snapshot) => {
+                API.onSnapshot('tags', (snapshot) => {
                     State.tags = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
                     App.renderTagCheckboxes();
                     App.renderManageTags();
-                    App.renderEntries(); // Tags might have changed
-                }, (error) => console.error("Error fetching tags:", error));
+                    App.renderEntries();
+                });
 
-                // Listen to Users (For custom auth & management)
-                onSnapshot(getColRef('users'), async (snapshot) => {
+                API.onSnapshot('users', async (snapshot) => {
                     State.users = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                    
-                    // Create default admin if system is completely empty
                     if(State.users.length === 0) {
                         try {
-                            await addDoc(getColRef('users'), { 
-                                account: 'admin', password: 'admin', name: '系統管理員', role: 'admin' 
-                            });
+                            await API.addDoc('users', { account: 'admin', password: 'admin', name: '系統管理員', role: 'admin' });
                         } catch(e) {}
                     }
                     App.renderUserList();
-                }, (error) => console.error("Error fetching users:", error));
+                });
             },
             
-            // --- Entries (Contact Book) ---
             saveEntry: async () => {
                 if (State.isGuest) return;
                 
@@ -560,7 +621,6 @@
                 const title = document.getElementById('entry-title').value;
                 const content = document.getElementById('entry-content').value;
                 
-                // Get selected tags
                 const tagCheckboxes = document.querySelectorAll('input[name="entry-tags"]:checked');
                 const selectedTags = Array.from(tagCheckboxes).map(cb => cb.value);
 
@@ -573,15 +633,14 @@
 
                 try {
                     if (id) {
-                        await updateDoc(getDocRef('entries', id), data);
+                        await API.updateDoc('entries', id, data);
                         UI.showToast("更新成功");
                     } else {
-                        await addDoc(getColRef('entries'), data);
+                        await API.addDoc('entries', data);
                         UI.showToast("新增成功");
                     }
                     UI.closeModal('entry-modal');
                 } catch (e) {
-                    console.error(e);
                     UI.showToast("儲存失敗", true);
                 }
             },
@@ -594,7 +653,6 @@
                 document.getElementById('entry-title').value = entry.title;
                 document.getElementById('entry-content').value = entry.content;
                 
-                // Check tags
                 document.querySelectorAll('input[name="entry-tags"]').forEach(cb => {
                     cb.checked = (entry.tags || []).includes(cb.value);
                 });
@@ -604,7 +662,7 @@
             },
             deleteEntry: async (id) => {
                 try {
-                    await deleteDoc(getDocRef('entries', id));
+                    await API.deleteDoc('entries', id);
                     UI.showToast("已刪除");
                 } catch (e) {
                     UI.showToast("刪除失敗", true);
@@ -706,20 +764,20 @@
                 if (!url.startsWith('http')) url = 'https://' + url;
 
                 try {
-                    await addDoc(getColRef('links'), { type, title, url, views: 0, timestamp: new Date().getTime() });
+                    await API.addDoc('links', { type, title, url, views: 0, timestamp: new Date().getTime() });
                     UI.showToast("新增資源成功");
                     UI.closeModal('link-modal');
                 } catch(e) { UI.showToast("新增失敗", true); }
             },
             deleteLink: async (id) => {
                 if(!State.currentUser || State.currentUser.role !== 'admin') return;
-                try { await deleteDoc(getDocRef('links', id)); UI.showToast("已刪除資源"); } 
+                try { await API.deleteDoc('links', id); UI.showToast("已刪除資源"); } 
                 catch(e) { UI.showToast("刪除失敗", true); }
             },
             recordLinkView: async (id, url) => {
                 const link = State.links.find(l => l.id === id);
                 if(link) {
-                    try { await updateDoc(getDocRef('links', id), { views: (link.views || 0) + 1 }); } 
+                    try { await API.updateDoc('links', id, { views: (link.views || 0) + 1 }); } 
                     catch(e) {} // Silent fail for counter
                 }
                 window.open(url, '_blank');
@@ -761,14 +819,14 @@
                 const name = document.getElementById('new-tag-name').value;
                 const color = document.getElementById('new-tag-color').value;
                 try {
-                    await addDoc(getColRef('tags'), { name, color });
+                    await API.addDoc('tags', { name, color });
                     document.getElementById('new-tag-name').value = '';
                     UI.showToast("標籤新增成功");
                 } catch(e) { UI.showToast("新增失敗", true); }
             },
             deleteTag: async (id) => {
                 if(!State.currentUser || State.currentUser.role !== 'admin') return;
-                try { await deleteDoc(getDocRef('tags', id)); UI.showToast("標籤已刪除"); } 
+                try { await API.deleteDoc('tags', id); UI.showToast("標籤已刪除"); } 
                 catch(e) { UI.showToast("刪除失敗", true); }
             },
             renderTagCheckboxes: () => {
