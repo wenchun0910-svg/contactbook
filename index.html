@@ -153,12 +153,6 @@
                 
                 <!-- Info & Search Block -->
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                    <!-- System Stats -->
-                    <div class="text-gray-500 text-[13px] flex flex-wrap justify-between items-center font-sans tracking-wide mb-4 pb-3 border-b border-gray-100">
-                        <span>最後更新: <span id="last-updated-text" class="text-gray-600">--/--/-- --:--</span></span>
-                        <span>瀏覽人次: <span id="page-views-text" class="font-bold text-gray-700">0</span></span>
-                    </div>
-                    
                     <!-- Search Bar -->
                     <div class="flex gap-2">
                         <div class="relative flex-grow">
@@ -501,7 +495,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-   const firebaseConfig = {
+     const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -957,8 +951,9 @@
                 
                 document.title = systemTitle;
                 
-                const viewsEl = document.getElementById('page-views-text');
-                if (viewsEl) viewsEl.textContent = State.system.views || 0;
+                // 同步更新畫面上所有的瀏覽人次標籤
+                const viewsEls = document.querySelectorAll('.page-views-text');
+                viewsEls.forEach(el => el.textContent = State.system.views || 0);
             },
             editSystemTitle: () => {
                 if (!State.currentUser || State.currentUser.role !== 'admin' || !State.system) return;
@@ -1006,7 +1001,8 @@
                 if (State.entries.length > 0) {
                     latestTimestamp = Math.max(...State.entries.map(e => e.timestamp || 0));
                 }
-                document.getElementById('last-updated-text').textContent = latestTimestamp ? UI.formatDateTime(latestTimestamp) : '--/--/-- --:--';
+                const timeStr = latestTimestamp ? UI.formatDateTime(latestTimestamp) : '--/--/-- --:--';
+                const viewsCount = State.system ? (State.system.views || 0) : 0;
 
                 if (filtered.length === 0) {
                     container.innerHTML = `<div class="text-center py-10 text-gray-400">沒有符合的聯絡簿資料</div>`;
@@ -1035,9 +1031,15 @@
                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-ao opacity-50"></div>
                             
                             <div class="flex justify-between items-start relative">
-                                <div class="w-full flex items-center gap-3 pr-12">
-                                    <div class="text-lg text-ao font-bold font-serif">${entry.date}</div>
-                                    <button onclick="App.showFullscreen('${entry.id}')" class="text-ao hover:text-white bg-ao/10 hover:bg-ao px-2 py-1 rounded text-xs font-bold transition flex items-center gap-1"><i class="fa-solid fa-expand"></i> 全螢幕</button>
+                                <div class="w-full flex items-center gap-3 pr-12 flex-wrap sm:flex-nowrap">
+                                    <div class="text-lg text-ao font-bold font-serif whitespace-nowrap">${entry.date}</div>
+                                    <button onclick="App.showFullscreen('${entry.id}')" class="text-ao hover:text-white bg-ao/10 hover:bg-ao px-2 py-1 rounded text-xs font-bold transition flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-expand"></i> 全螢幕</button>
+                                    
+                                    <!-- 資訊列：自動推到最右側 -->
+                                    <div class="ml-auto hidden sm:flex text-gray-500 text-[13px] gap-4 items-center font-sans tracking-wide">
+                                        <span class="whitespace-nowrap">最後更新: <span class="text-gray-600 last-updated-text">${timeStr}</span></span>
+                                        <span class="whitespace-nowrap">瀏覽人次: <span class="font-bold text-gray-700 page-views-text">${viewsCount}</span></span>
+                                    </div>
                                 </div>
                                 ${canEdit ? `
                                 <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition absolute right-0 top-0 bg-white bg-opacity-90 p-1 rounded">
