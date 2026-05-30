@@ -789,14 +789,43 @@
                 });
             },
 
+            // 將舊式或瀏覽器產生的 <font> 標籤，強制轉換為絕對生效的 <span> inline-style
+            convertFontToSpan: (htmlStr) => {
+                if (!htmlStr) return '';
+                return htmlStr.replace(/<font\s+([^>]+)>/gi, (match, attrs) => {
+                    let style = '';
+                    const sizeMatch = attrs.match(/size=["']?(\d)["']?/i);
+                    if (sizeMatch) {
+                        const sizes = {'1':'0.75em', '2':'0.875em', '3':'1em', '4':'1.125em', '5':'1.5em', '6':'2em', '7':'3em'};
+                        style += `font-size: ${sizes[sizeMatch[1]] || '1em'} !important; `;
+                    }
+                    const colorMatch = attrs.match(/color=["']?([^"'\s>]+)["']?/i);
+                    if (colorMatch) {
+                        style += `color: ${colorMatch[1]} !important; `;
+                    }
+                    return `<span style="${style}">`;
+                }).replace(/<\/font>/gi, '</span>');
+            },
+
             // 處理內容標籤渲染 (共用於列表與全螢幕)
             formatContentWithTags: (rawContent) => {
                 let content = rawContent || '';
-                // 兼容舊版純文字：如果沒有任何 HTML 排版標籤，則將換行符號轉為 <br>
-                if (!/<div>|<br>|<p>|<span>|<font>/i.test(content)) {
-                    content = UI.escapeHtml(content).replace(/\n/g, '<br>');
+                
+                // 1. 還原被意外變成純文字的 HTML 標籤 (解決畫面上看到 <font size="7"> 的問題)
+                content = content.replace(/&lt;(\/?(?:font|span|div|br|p|b|i|u|strong|em)(?:\s+[^&>]*?)?)&gt;/gi, '<$1>');
+                
+                // 2. 兼容舊版純文字：如果沒有包含任何區塊標籤，則將 \n 轉為 <br>
+                if (!/<(?:br|div|p|h\d|ul|li|ol|table|tr|td|th)\b/i.test(content)) {
+                    content = content.replace(/\n/g, '<br>');
                 }
                 
+                // 3. 基本 XSS 防護
+                content = content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+                
+                // 4. 將 <font> 轉換為 <span> (解決 Tailwind CSS 覆蓋字體樣式的問題)
+                content = App.convertFontToSpan(content);
+                
+                // 5. 動態替換標籤為 Badge
                 State.tags.forEach(t => {
                     const safeTagName = UI.escapeHtml(t.name);
                     const badgeHtml = `<span class="tag-badge whitespace-nowrap mx-1 relative -top-[1px] shadow-sm align-middle" style="background-color: ${t.color}; font-size: 0.85em; padding: 4px 10px;">${safeTagName}</span>`;
@@ -854,8 +883,9 @@
                 
                 const id = document.getElementById('entry-id').value;
                 const date = document.getElementById('entry-date').value;
-                // 從 HTML 編輯器取得內容
-                const content = document.getElementById('entry-content').innerHTML; 
+                // 從 HTML 編輯器取得內容，並在存檔前就轉換修復標籤
+                let content = document.getElementById('entry-content').innerHTML; 
+                content = App.convertFontToSpan(content);
                 
                 // 自動解析內容中包含哪些標籤，存入資料庫以供未來搜尋或篩選使用
                 const selectedTags = State.tags
