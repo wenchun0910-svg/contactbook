@@ -172,14 +172,23 @@
 
                 <!-- Calendar -->
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="bg-sakura text-white p-3 flex justify-between items-center">
+                    <div class="bg-ao text-white p-3 flex justify-between items-center">
                         <button onclick="Calendar.prevMonth()" class="hover:text-washi"><i class="fa-solid fa-chevron-left"></i></button>
                         <h3 id="calendar-month" class="font-serif font-bold text-lg">2023年 10月</h3>
                         <button onclick="Calendar.nextMonth()" class="hover:text-washi"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                     <div class="p-4">
-                    <i class="fa-solid fa-circle text-ao mr-1 text-[8px]"></i>表示當日有聯絡簿<br>
-                    點擊日期可篩選該日內容
+                        <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-500 mb-2">
+                            <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+                        </div>
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm">
+                            <!-- Calendar days injected here -->
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-3 text-xs text-gray-500 border-t border-gray-100">
+                        <i class="fa-solid fa-circle text-ao mr-1 text-[8px]"></i>表示當日有聯絡簿<br>
+                        點擊日期可篩選該日內容
+                    </div>
                 </div>
             </div>
         </div>
@@ -492,7 +501,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-  const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
