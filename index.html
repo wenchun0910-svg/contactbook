@@ -328,7 +328,14 @@
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase Configuration (Sandbox Environment)
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+        const firebaseConfig = {
+  apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
+  authDomain: "contactbook-c6d95.firebaseapp.com",
+  projectId: "contactbook-c6d95",
+  storageBucket: "contactbook-c6d95.firebasestorage.app",
+  messagingSenderId: "655576113880",
+  appId: "1:655576113880:web:15606f5cad291d8aca6dad"
+};
             // Mock config for local testing if needed
         };
         const app = initializeApp(firebaseConfig);
