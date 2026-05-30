@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>網路聯絡簿</title>
+    <title>和風學園 - 網路聯絡簿</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -458,7 +458,15 @@
             openModal: (id) => {
                 document.getElementById(id).classList.add('active');
                 if(id === 'entry-modal' && !document.getElementById('entry-id').value) {
-                    document.getElementById('entry-date').value = new Date().toISOString().split('T')[0];
+                    
+                    // 若有在日曆點選特定日期，優先使用該日期，否則使用今天
+                    let defaultDate = State.selectedDate;
+                    if (!defaultDate) {
+                        const d = new Date();
+                        defaultDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    }
+
+                    document.getElementById('entry-date').value = defaultDate;
                     document.getElementById('entry-content').innerHTML = '';
                     document.getElementById('entry-content').focus();
                 }
@@ -495,7 +503,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-     const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -503,6 +511,7 @@
   messagingSenderId: "655576113880",
   appId: "1:655576113880:web:15606f5cad291d8aca6dad"
 };
+
         // =========================================================
 
         let app, auth, db;
@@ -1032,7 +1041,7 @@
                             
                             <div class="flex justify-between items-start relative">
                                 <div class="w-full flex items-center gap-3 pr-12 flex-wrap sm:flex-nowrap">
-                                    <div class="text-lg text-ao font-bold font-serif whitespace-nowrap">${entry.date}</div>
+                                    <div class="text-lg text-ao font-bold font-serif whitespace-nowrap flex items-center">${entry.date}</div>
                                     <button onclick="App.showFullscreen('${entry.id}')" class="text-ao hover:text-white bg-ao/10 hover:bg-ao px-2 py-1 rounded text-xs font-bold transition flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-expand"></i> 全螢幕</button>
                                     
                                     <!-- 資訊列：自動推到最右側 -->
@@ -1269,6 +1278,7 @@
                 const firstDay = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 const today = new Date();
+                const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                 
                 const grid = document.getElementById('calendar-grid');
                 let html = '';
