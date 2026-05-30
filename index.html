@@ -270,7 +270,7 @@
 
     <!-- Fullscreen Presentation Modal -->
     <div id="fullscreen-modal" class="modal fixed inset-0 bg-washi z-[100] flex-col overflow-y-auto">
-        <div class="sticky top-0 bg-ao text-white p-4 shadow-md flex justify-between items-center z-10">
+        <div class="sticky top-0 bg-ao text-white p-4 shadow-md flex justify-between items-center z-20">
             <div class="flex items-center gap-3">
                 <i class="fa-solid fa-expand text-xl"></i>
                 <h2 class="text-xl md:text-2xl font-serif font-bold tracking-wider">聯絡簿全螢幕展示</h2>
@@ -279,18 +279,11 @@
                 <i class="fa-solid fa-times"></i> 關閉全螢幕
             </button>
         </div>
-        <div class="container mx-auto px-4 py-8 md:py-12 max-w-5xl pb-20">
-            <div class="bg-white rounded-2xl shadow-xl p-8 md:p-14 border-2 border-ao">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b-2 border-gray-100">
-                    <div class="text-3xl md:text-5xl text-ao font-bold font-serif mb-4 md:mb-0" id="fs-date"></div>
-                    <div class="text-gray-500 text-lg flex items-center gap-2">
-                        <i class="fa-solid fa-user-pen"></i> <span id="fs-author"></span>
-                    </div>
-                </div>
-                <!-- 展示內容區域 -->
-                <div id="fs-content" class="text-xl md:text-3xl text-gray-800 font-sans" style="line-height: 1.8;">
-                    <!-- Content Injected here -->
-                </div>
+        <!-- 放寬容器寬度以容納雙欄 -->
+        <div class="container mx-auto px-4 py-8 md:py-12 max-w-[95%] pb-20">
+            <!-- 雙欄內容將由 JS 動態注入於此 -->
+            <div id="fs-container">
+                <!-- Content Injected here -->
             </div>
         </div>
     </div>
@@ -1070,23 +1063,79 @@
                 }).join('');
             },
             showFullscreen: (id) => {
-                const entry = State.entries.find(e => e.id === id);
-                if(!entry) return;
+                const baseEntry = State.entries.find(e => e.id === id);
+                if(!baseEntry) return;
 
-                document.getElementById('fs-date').textContent = entry.date;
-                document.getElementById('fs-author').textContent = entry.authorName;
+                // 1. 取得被點選的該天日期
+                const baseDateStr = baseEntry.date;
+                const baseDateObj = new Date(baseDateStr);
                 
-                // 處理相容性標籤與內容
-                const formattedContent = App.formatContentWithTags(entry.content);
-                let legacyTagsHtml = '';
-                (entry.tags || []).forEach(tagId => {
-                    const t = State.tags.find(x => x.id === tagId);
-                    if(t && !entry.content.includes(`【${t.name}】`)) {
-                        legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-2 relative -top-[2px]" style="background-color: ${t.color}; font-size: 0.6em; padding: 6px 12px;">${UI.escapeHtml(t.name)}</span>`;
-                    }
-                });
+                // 2. 計算明天的日期
+                const nextDateObj = new Date(baseDateObj);
+                nextDateObj.setDate(nextDateObj.getDate() + 1);
+                const nextDateStr = `${nextDateObj.getFullYear()}-${String(nextDateObj.getMonth() + 1).padStart(2, '0')}-${String(nextDateObj.getDate()).padStart(2, '0')}`;
 
-                document.getElementById('fs-content').innerHTML = legacyTagsHtml + formattedContent;
+                // 3. 篩選出今天與明天的所有聯絡簿項目
+                const todayEntries = State.entries.filter(e => e.date === baseDateStr);
+                const tomorrowEntries = State.entries.filter(e => e.date === nextDateStr);
+
+                // 4. 渲染單一區塊的函數 (包含無資料時的空狀態設計)
+                const renderFsSection = (title, entries) => {
+                    if (entries.length === 0) {
+                        return `
+                            <div class="bg-white/60 rounded-2xl shadow-sm p-6 md:p-10 border-2 border-dashed border-gray-300 h-full flex flex-col">
+                                <div class="text-2xl md:text-3xl text-gray-400 font-bold font-serif mb-6 pb-4 border-b-2 border-gray-200 flex items-center gap-3">
+                                    <i class="fa-regular fa-calendar"></i> ${title}
+                                </div>
+                                <div class="flex-grow flex items-center justify-center text-gray-400 text-2xl font-sans py-20">
+                                    此日無聯絡簿內容
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    let contentHtml = entries.map(entry => {
+                        const formattedContent = App.formatContentWithTags(entry.content);
+                        let legacyTagsHtml = '';
+                        (entry.tags || []).forEach(tagId => {
+                            const t = State.tags.find(x => x.id === tagId);
+                            if(t && !entry.content.includes(`【${t.name}】`)) {
+                                legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-2 relative -top-[2px]" style="background-color: ${t.color}; font-size: 0.6em; padding: 6px 12px;">${UI.escapeHtml(t.name)}</span>`;
+                            }
+                        });
+                        return `
+                            <div class="mb-10 last:mb-0">
+                                <div class="text-gray-500 text-sm md:text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-user-pen"></i> 發布者: ${UI.escapeHtml(entry.authorName)}</div>
+                                <div class="text-xl md:text-3xl text-gray-800 font-sans" style="line-height: 1.8;">
+                                    ${legacyTagsHtml}${formattedContent}
+                                </div>
+                            </div>
+                        `;
+                    }).join('<hr class="my-6 border-gray-200">');
+
+                    return `
+                        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-10 border-2 border-ao h-full flex flex-col relative overflow-hidden">
+                            <div class="absolute top-0 left-0 right-0 h-2 bg-ao"></div>
+                            <div class="text-3xl md:text-4xl text-ao font-bold font-serif mb-6 pb-4 border-b-2 border-ao/20 flex items-center gap-3">
+                                <i class="fa-regular fa-calendar-check"></i> ${title}
+                            </div>
+                            <div class="flex-grow">
+                                ${contentHtml}
+                            </div>
+                        </div>
+                    `;
+                };
+
+                // 5. 將組合好的雙欄 HTML 注入至 Modal 容器
+                const fsContainer = document.getElementById('fs-container');
+                // 使用 CSS Grid 實現左右雙欄 (大螢幕) / 上下排列 (手機平板)
+                fsContainer.className = "grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-10 items-stretch";
+                
+                const todayTitle = `${baseDateStr}`;
+                const tomorrowTitle = `${nextDateStr} <span class="text-xl md:text-2xl text-ao/60 ml-2">(明日)</span>`;
+
+                fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
+                
                 UI.openModal('fullscreen-modal');
             },
             clearFilters: () => {
