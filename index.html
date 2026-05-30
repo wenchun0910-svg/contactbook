@@ -81,6 +81,9 @@
                 <button id="btn-login-modal" class="bg-washi text-matcha px-4 py-1.5 rounded-full hover:bg-opacity-90 transition shadow text-sm font-bold">
                     登入管理
                 </button>
+                <button id="btn-password-modal" class="hidden bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full hover:bg-gray-300 transition shadow text-sm font-bold">
+                    修改密碼
+                </button>
                 <button id="btn-logout" class="hidden bg-sakura text-washi px-4 py-1.5 rounded-full hover:bg-sakura-dark transition shadow text-sm font-bold">
                     登出
                 </button>
@@ -331,6 +334,31 @@
         </div>
     </div>
 
+    <!-- Password Modal -->
+    <div id="password-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
+        <div class="bg-washi p-8 rounded-lg shadow-xl w-full max-w-sm border-t-4 border-matcha">
+            <h2 class="text-2xl font-serif text-center mb-6 text-sumi">修改密碼</h2>
+            <form id="password-form" class="space-y-4" onsubmit="event.preventDefault(); Auth.changePassword();">
+                <div>
+                    <label class="block text-sm font-bold mb-1 text-gray-700">原密碼</label>
+                    <input type="password" id="old-password" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1 text-gray-700">新密碼</label>
+                    <input type="password" id="new-password" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-1 text-gray-700">確認新密碼</label>
+                    <input type="password" id="confirm-password" required class="w-full p-2 border rounded focus:border-matcha focus:outline-none">
+                </div>
+                <div class="flex gap-2 pt-4">
+                    <button type="button" onclick="UI.closeModal('password-modal')" class="w-1/3 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400 transition">取消</button>
+                    <button type="submit" class="w-2/3 bg-matcha text-white py-2 rounded hover:bg-matcha-dark transition">確認修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Custom Toast -->
     <div id="toast" class="toast">訊息</div>
 
@@ -372,6 +400,7 @@
                 document.getElementById(id).classList.remove('active');
                 if(id === 'entry-modal') document.getElementById('entry-form').reset();
                 if(id === 'login-modal') document.getElementById('login-form').reset();
+                if(id === 'password-modal') document.getElementById('password-form').reset();
                 if(id === 'tag-modal') document.getElementById('tag-form').reset();
                 if(id === 'user-modal') document.getElementById('user-form').reset();
                 if(id === 'link-modal') document.getElementById('link-form').reset();
@@ -396,7 +425,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-       const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -533,17 +562,20 @@
             updateUI: () => {
                 const btnLogin = document.getElementById('btn-login-modal');
                 const btnLogout = document.getElementById('btn-logout');
+                const btnPassword = document.getElementById('btn-password-modal');
                 const userInfo = document.getElementById('user-info');
                 const adminToolbar = document.getElementById('admin-toolbar');
                 
                 if (State.isGuest) {
                     btnLogin.classList.remove('hidden');
                     btnLogout.classList.add('hidden');
+                    if(btnPassword) btnPassword.classList.add('hidden');
                     userInfo.classList.add('hidden');
                     adminToolbar.classList.add('hidden');
                 } else {
                     btnLogin.classList.add('hidden');
                     btnLogout.classList.remove('hidden');
+                    if(btnPassword) btnPassword.classList.remove('hidden');
                     userInfo.classList.remove('hidden');
                     adminToolbar.classList.remove('hidden');
                     
@@ -581,6 +613,41 @@
                     UI.showToast("新增失敗", true);
                 }
             },
+            changePassword: async () => {
+                if (!State.currentUser) return;
+                const oldPass = document.getElementById('old-password').value;
+                const newPass = document.getElementById('new-password').value;
+                const confirmPass = document.getElementById('confirm-password').value;
+
+                // 取得最新使用者資料以比對舊密碼
+                const userRecord = State.users.find(u => u.id === State.currentUser.id);
+                if (!userRecord || userRecord.password !== oldPass) {
+                    return UI.showToast("原密碼錯誤", true);
+                }
+                if (newPass !== confirmPass) {
+                    return UI.showToast("兩次輸入的新密碼不一致", true);
+                }
+
+                try {
+                    await API.updateDoc('users', State.currentUser.id, { password: newPass });
+                    UI.showToast("密碼修改成功");
+                    UI.closeModal('password-modal');
+                } catch (e) {
+                    UI.showToast("密碼修改失敗", true);
+                }
+            },
+            resetUserPassword: async (id) => {
+                if (!State.currentUser || State.currentUser.role !== 'admin') return;
+                const newPass = prompt("請輸入該帳號的新密碼：");
+                if (newPass && newPass.trim() !== "") {
+                    try {
+                        await API.updateDoc('users', id, { password: newPass.trim() });
+                        UI.showToast("密碼已成功重設");
+                    } catch(e) {
+                        UI.showToast("重設失敗", true);
+                    }
+                }
+            },
             deleteUser: async (id) => {
                 if (!State.currentUser || State.currentUser.role !== 'admin') return;
                 if(State.currentUser.id === id) return UI.showToast("無法刪除自己", true);
@@ -599,6 +666,9 @@
             init: () => {
                 document.getElementById('btn-login-modal').addEventListener('click', () => UI.openModal('login-modal'));
                 document.getElementById('btn-logout').addEventListener('click', Auth.logout);
+                const btnPasswordModal = document.getElementById('btn-password-modal');
+                if(btnPasswordModal) btnPasswordModal.addEventListener('click', () => UI.openModal('password-modal'));
+                
                 document.getElementById('search-input').addEventListener('input', (e) => {
                     State.searchQuery = e.target.value;
                     App.renderEntries();
@@ -999,7 +1069,8 @@
                             </span>
                         </td>
                         <td class="p-2 text-right">
-                            <button onclick="Auth.deleteUser('${u.id}')" class="text-sakura hover:text-sakura-dark text-sm"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="Auth.resetUserPassword('${u.id}')" class="text-matcha hover:text-matcha-dark text-sm mr-3" title="重設密碼"><i class="fa-solid fa-key"></i></button>
+                            <button onclick="Auth.deleteUser('${u.id}')" class="text-sakura hover:text-sakura-dark text-sm" title="刪除帳號"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `).join('');
