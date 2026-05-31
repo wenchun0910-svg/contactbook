@@ -341,7 +341,7 @@
                 <h2 class="text-xl font-serif text-sumi font-bold">標籤管理</h2>
                 <button onclick="UI.closeModal('tag-modal')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
-            <div class="p-6">
+            <div class="px-6 pb-6 pt-3">
                 <form id="tag-form" class="flex gap-2 mb-6" onsubmit="event.preventDefault(); App.addTag();">
                     <input type="text" id="new-tag-name" placeholder="標籤名稱 (例:重要)" required class="flex-grow p-2 border rounded focus:border-ao focus:outline-none">
                     <input type="color" id="new-tag-color" value="#D9A0A0" class="p-1 border rounded h-10 w-12 cursor-pointer focus:border-ao focus:outline-none">
@@ -361,7 +361,7 @@
                 <h2 id="link-modal-title" class="text-xl font-serif text-sumi font-bold">新增資源/文件連結</h2>
                 <button onclick="UI.closeModal('link-modal')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
-            <div class="p-6">
+            <div class="px-6 pb-6 pt-2">
                 <form id="link-form" class="space-y-4" onsubmit="event.preventDefault(); App.saveLink();">
                     <input type="hidden" id="link-id">
                     <div>
@@ -511,7 +511,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-    const firebaseConfig = {
+     const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
