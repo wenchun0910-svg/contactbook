@@ -356,40 +356,40 @@
 
     <!-- Links/Docs Management Modal -->
     <div id="link-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
-        <div class="bg-washi rounded-lg shadow-xl w-full max-w-lg flex flex-col border-t-4 border-wood">
-            <div class="p-4 border-b flex justify-between items-center bg-white">
+        <div class="bg-washi rounded-lg shadow-xl w-full max-w-lg max-h-[95vh] flex flex-col border-t-4 border-wood">
+            <div class="p-4 border-b flex justify-between items-center bg-white shrink-0">
                 <h2 id="link-modal-title" class="text-xl font-serif text-sumi font-bold">新增資源/文件連結</h2>
                 <button onclick="UI.closeModal('link-modal')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
-            <div class="px-6 pb-6 pt-2">
-                <form id="link-form" class="space-y-4" onsubmit="event.preventDefault(); App.saveLink();">
+            <div class="px-6 pb-6 pt-3 overflow-y-auto">
+                <form id="link-form" class="space-y-3" onsubmit="event.preventDefault(); App.saveLink();">
                     <input type="hidden" id="link-id">
                     <div>
                         <label class="block text-sm font-bold mb-1">類型</label>
-                        <select id="link-type" class="w-full p-2 border rounded focus:border-ao focus:outline-none">
+                        <select id="link-type" class="w-full px-2 py-1.5 border rounded focus:border-ao focus:outline-none">
                             <option value="document">文件 (Document)</option>
                             <option value="website">網站 (Website)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1">標題</label>
-                        <input type="text" id="link-title" required placeholder="如：本學期行事曆" class="w-full p-2 border rounded focus:border-ao focus:outline-none">
+                        <input type="text" id="link-title" required placeholder="如：本學期行事曆" class="w-full px-2 py-1.5 border rounded focus:border-ao focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1 text-gray-700">標籤 (可複選)</label>
-                        <div id="link-tags-container" class="flex flex-wrap gap-2 p-2 border rounded bg-white min-h-[42px]">
+                        <div id="link-tags-container" class="flex flex-wrap gap-1.5 p-2 border rounded bg-white min-h-[42px] max-h-[120px] overflow-y-auto">
                             <!-- Checkboxes injected here -->
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1 text-gray-700">發布期限 (選填，逾期自動隱藏)</label>
-                        <input type="date" id="link-expire-date" class="w-full p-2 border rounded bg-white focus:outline-none focus:border-ao text-gray-700">
+                        <input type="date" id="link-expire-date" class="w-full px-2 py-1.5 border rounded bg-white focus:outline-none focus:border-ao text-gray-700">
                     </div>
                     <div>
                         <label class="block text-sm font-bold mb-1">URL 網址</label>
-                        <input type="url" id="link-url" required placeholder="https://..." class="w-full p-2 border rounded focus:border-ao focus:outline-none">
+                        <input type="url" id="link-url" required placeholder="https://..." class="w-full px-2 py-1.5 border rounded focus:border-ao focus:outline-none">
                     </div>
-                    <div class="flex justify-end pt-2">
+                    <div class="flex justify-end pt-2 shrink-0">
                         <button type="submit" class="bg-wood text-white px-6 py-2 rounded hover:bg-opacity-90 transition">儲存</button>
                     </div>
                 </form>
@@ -511,7 +511,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-     const firebaseConfig = {
+  const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
