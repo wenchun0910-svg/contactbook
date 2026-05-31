@@ -354,11 +354,12 @@
     <div id="link-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
         <div class="bg-washi rounded-lg shadow-xl w-full max-w-lg flex flex-col border-t-4 border-wood">
             <div class="p-4 border-b flex justify-between items-center bg-white">
-                <h2 class="text-xl font-serif text-sumi font-bold">新增資源/文件連結</h2>
+                <h2 id="link-modal-title" class="text-xl font-serif text-sumi font-bold">新增資源/文件連結</h2>
                 <button onclick="UI.closeModal('link-modal')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
             <div class="p-6">
-                <form id="link-form" class="space-y-4" onsubmit="event.preventDefault(); App.addLink();">
+                <form id="link-form" class="space-y-4" onsubmit="event.preventDefault(); App.saveLink();">
+                    <input type="hidden" id="link-id">
                     <div>
                         <label class="block text-sm font-bold mb-1">類型</label>
                         <select id="link-type" class="w-full p-2 border rounded focus:border-ao focus:outline-none">
@@ -385,7 +386,7 @@
                         <input type="url" id="link-url" required placeholder="https://..." class="w-full p-2 border rounded focus:border-ao focus:outline-none">
                     </div>
                     <div class="flex justify-end pt-2">
-                        <button type="submit" class="bg-wood text-white px-6 py-2 rounded hover:bg-opacity-90 transition">新增</button>
+                        <button type="submit" class="bg-wood text-white px-6 py-2 rounded hover:bg-opacity-90 transition">儲存</button>
                     </div>
                 </form>
             </div>
@@ -474,7 +475,10 @@
                 if(id === 'password-modal') document.getElementById('password-form').reset();
                 if(id === 'tag-modal') document.getElementById('tag-form').reset();
                 if(id === 'user-modal') document.getElementById('user-form').reset();
-                if(id === 'link-modal') document.getElementById('link-form').reset();
+                if(id === 'link-modal') {
+                    document.getElementById('link-form').reset();
+                    document.getElementById('link-id').value = '';
+                }
                 document.getElementById('entry-id').value = '';
             },
             escapeHtml: (unsafe) => {
@@ -503,7 +507,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-         const firebaseConfig = {
+           const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1160,8 +1164,9 @@
             },
 
             // --- Links/Docs ---
-            addLink: async () => {
+            saveLink: async () => {
                 if(!State.currentUser || State.currentUser.role !== 'admin') return;
+                const id = document.getElementById('link-id').value;
                 const type = document.getElementById('link-type').value;
                 const title = document.getElementById('link-title').value;
                 let url = document.getElementById('link-url').value;
@@ -1172,10 +1177,32 @@
                 const selectedTags = Array.from(tagCheckboxes).map(cb => cb.value);
 
                 try {
-                    await API.addDoc('links', { type, title, url, expireDate, tags: selectedTags, views: 0, timestamp: new Date().getTime() });
-                    UI.showToast("新增資源成功");
+                    if (id) {
+                        await API.updateDoc('links', id, { type, title, url, expireDate, tags: selectedTags });
+                        UI.showToast("資源更新成功");
+                    } else {
+                        await API.addDoc('links', { type, title, url, expireDate, tags: selectedTags, views: 0, timestamp: new Date().getTime() });
+                        UI.showToast("新增資源成功");
+                    }
                     UI.closeModal('link-modal');
-                } catch(e) { UI.showToast("新增失敗", true); }
+                } catch(e) { UI.showToast("儲存失敗", true); }
+            },
+            editLink: (id) => {
+                const link = State.links.find(l => l.id === id);
+                if(!link) return;
+
+                document.getElementById('link-id').value = link.id;
+                document.getElementById('link-type').value = link.type || 'document';
+                document.getElementById('link-title').value = link.title;
+                document.getElementById('link-url').value = link.url;
+                document.getElementById('link-expire-date').value = link.expireDate || '';
+
+                document.querySelectorAll('input[name="link-tags"]').forEach(cb => {
+                    cb.checked = (link.tags || []).includes(cb.value);
+                });
+
+                UI.openModal('link-modal');
+                document.getElementById('link-modal-title').textContent = "修改資源/文件連結";
             },
             deleteLink: async (id) => {
                 if(!State.currentUser || State.currentUser.role !== 'admin') return;
@@ -1240,7 +1267,10 @@
                                 </div>
                             </button>
                             ${isAdmin ? `
-                                <button onclick="App.deleteLink('${link.id}')" class="text-gray-400 hover:text-sakura px-2 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash text-sm"></i></button>
+                                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition px-2">
+                                    <button onclick="App.editLink('${link.id}')" class="text-gray-400 hover:text-ao" title="修改"><i class="fa-solid fa-pen text-sm"></i></button>
+                                    <button onclick="App.deleteLink('${link.id}')" class="text-gray-400 hover:text-sakura" title="刪除"><i class="fa-solid fa-trash text-sm"></i></button>
+                                </div>
                             ` : ''}
                         </div>
                     `;
