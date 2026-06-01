@@ -497,7 +497,8 @@
                 if (!timestamp) return '--/--/-- --:--';
                 const d = new Date(timestamp);
                 const pad = (n) => String(n).padStart(2, '0');
-                return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                const minguoYear = d.getFullYear() - 1911;
+                return `${minguoYear}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
             },
             getWeekdayStr: (dateStr) => {
                 if (!dateStr) return '';
@@ -505,13 +506,19 @@
                 if (isNaN(d.getTime())) return '';
                 const weekdays = ['(日)', '(一)', '(二)', '(三)', '(四)', '(五)', '(六)'];
                 return weekdays[d.getDay()];
+            },
+            toMinguo: (dateStr) => {
+                if (!dateStr) return '';
+                const parts = dateStr.split('-');
+                if (parts.length !== 3) return dateStr;
+                return `${parts[0] - 1911}/${parts[1]}/${parts[2]}`;
             }
         };
 
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-  const firebaseConfig = {
+    const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -751,8 +758,8 @@
         // Main App Logic
         window.App = {
             init: () => {
-                // 自動更新底部版權年份
-                document.getElementById('footer-year').textContent = new Date().getFullYear();
+                // 自動更新底部版權年份 (民國年)
+                document.getElementById('footer-year').textContent = new Date().getFullYear() - 1911;
 
                 // 預設：首頁載入時自動選取「今天」的日期
                 const d = new Date();
@@ -1028,7 +1035,7 @@
                 if (State.selectedDate) {
                     filtered = filtered.filter(e => e.date === State.selectedDate);
                     const filterText = document.getElementById('current-filter-text');
-                    filterText.textContent = `篩選日期：${State.selectedDate}`;
+                    filterText.textContent = `篩選日期：${UI.toMinguo(State.selectedDate)}`;
                     filterText.classList.remove('hidden');
                     document.getElementById('btn-clear-filter').classList.remove('hidden');
                 } else {
@@ -1075,7 +1082,7 @@
                             <div class="flex justify-between items-start relative">
                                 <div class="w-full flex items-center gap-3 pr-12 flex-wrap sm:flex-nowrap">
                                     <div class="text-lg text-ao font-bold font-serif whitespace-nowrap flex items-center">
-                                        ${entry.date} <span class="ml-1 text-base font-medium opacity-90">${UI.getWeekdayStr(entry.date)}</span>
+                                        ${UI.toMinguo(entry.date)} <span class="ml-1 text-base font-medium opacity-90">${UI.getWeekdayStr(entry.date)}</span>
                                     </div>
                                     <button onclick="App.showFullscreen('${entry.id}')" class="text-ao hover:text-white bg-ao/10 hover:bg-ao px-2 py-1 rounded text-xs font-bold transition flex items-center gap-1 whitespace-nowrap"><i class="fa-solid fa-expand"></i> 全螢幕</button>
                                     
@@ -1107,6 +1114,9 @@
             showFullscreen: (id) => {
                 const baseEntry = State.entries.find(e => e.id === id);
                 if(!baseEntry) return;
+
+                document.getElementById('fs-date').textContent = `${UI.toMinguo(baseEntry.date)} ${UI.getWeekdayStr(baseEntry.date)}`;
+                document.getElementById('fs-author').textContent = baseEntry.authorName;
 
                 // 1. 取得被點選的該天日期
                 const baseDateStr = baseEntry.date;
@@ -1173,8 +1183,8 @@
                 // 使用 CSS Grid 實現左右雙欄 (大螢幕) / 上下排列 (手機平板)
                 fsContainer.className = "grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-10 items-stretch";
                 
-                const todayTitle = `${baseDateStr} <span class="text-2xl md:text-3xl ml-1 font-medium opacity-90">${UI.getWeekdayStr(baseDateStr)}</span>`;
-                const tomorrowTitle = `${nextDateStr} <span class="text-2xl md:text-3xl ml-1 font-medium opacity-90">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-xl md:text-2xl text-ao/60 ml-2 font-normal">(明日)</span>`;
+                const todayTitle = `${UI.toMinguo(baseDateStr)} <span class="text-2xl md:text-3xl ml-1 font-medium opacity-90">${UI.getWeekdayStr(baseDateStr)}</span>`;
+                const tomorrowTitle = `${UI.toMinguo(nextDateStr)} <span class="text-2xl md:text-3xl ml-1 font-medium opacity-90">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-xl md:text-2xl text-ao/60 ml-2 font-normal">(明日)</span>`;
 
                 fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
                 
@@ -1288,7 +1298,7 @@
                                     </div>
                                     <div class="text-xs text-gray-500 mt-1 flex items-center gap-3">
                                         <span>觀看次數: ${link.views || 0}</span>
-                                        ${link.expireDate ? `<span class="text-sakura"><i class="fa-regular fa-clock"></i> 期限至: ${link.expireDate}</span>` : ''}
+                                        ${link.expireDate ? `<span class="text-sakura"><i class="fa-regular fa-clock"></i> 期限至: ${UI.toMinguo(link.expireDate)}</span>` : ''}
                                     </div>
                                 </div>
                             </button>
@@ -1391,7 +1401,7 @@
                 const year = date.getFullYear();
                 const month = date.getMonth();
                 
-                document.getElementById('calendar-month').textContent = `${year}年 ${month + 1}月`;
+                document.getElementById('calendar-month').textContent = `${year - 1911}年 ${month + 1}月`;
                 
                 const firstDay = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
