@@ -518,7 +518,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-       const firebaseConfig = {
+     const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1177,8 +1177,8 @@
 
                 // 5. 將組合好的雙欄 HTML 注入至 Modal 容器
                 const fsContainer = document.getElementById('fs-container');
-                // 使用 CSS Grid 實現左右雙欄 (大螢幕) / 上下排列 (手機平板)
-                fsContainer.className = "grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-10 items-stretch";
+                // 將 xl:grid-cols-2 改為 md:grid-cols-2，確保在一般投影機與筆電上都是左右並排顯示
+                fsContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch";
                 
                 const todayTitle = `${UI.toMinguo(baseDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90">${UI.getWeekdayStr(baseDateStr)}</span>`;
                 const tomorrowTitle = `${UI.toMinguo(nextDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-lg md:text-xl text-ao/60 ml-2 font-normal">(明日)</span>`;
