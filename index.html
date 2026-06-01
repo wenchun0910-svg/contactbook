@@ -518,7 +518,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-    const firebaseConfig = {
+      const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1114,9 +1114,6 @@
             showFullscreen: (id) => {
                 const baseEntry = State.entries.find(e => e.id === id);
                 if(!baseEntry) return;
-
-                document.getElementById('fs-date').textContent = `${UI.toMinguo(baseEntry.date)} ${UI.getWeekdayStr(baseEntry.date)}`;
-                document.getElementById('fs-author').textContent = baseEntry.authorName;
 
                 // 1. 取得被點選的該天日期
                 const baseDateStr = baseEntry.date;
