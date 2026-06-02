@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> 網路聯絡簿</title>
+    <title>和風學園 - 網路聯絡簿</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -279,9 +279,15 @@
                 <i class="fa-solid fa-expand text-lg"></i>
                 <h2 class="text-lg md:text-xl font-serif font-bold tracking-normal">聯絡簿全螢幕展示</h2>
             </div>
-            <button onclick="UI.closeModal('fullscreen-modal')" class="text-white hover:bg-white/20 transition px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base font-bold flex items-center gap-2 border border-white/30">
-                <i class="fa-solid fa-times"></i> 關閉全螢幕
-            </button>
+            <!-- 加入 flex 容器包裝時鐘與關閉按鈕 -->
+            <div class="flex items-center gap-4 md:gap-6">
+                <!-- 動態時鐘 -->
+                <div id="fs-current-time" class="text-lg md:text-xl font-bold font-mono tracking-widest opacity-90"></div>
+                
+                <button onclick="UI.closeModal('fullscreen-modal')" class="text-white hover:bg-white/20 transition px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base font-bold flex items-center gap-2 border border-white/30">
+                    <i class="fa-solid fa-times"></i> 關閉全螢幕
+                </button>
+            </div>
         </div>
         <!-- 放寬容器寬度以容納雙欄，並移除上方間距 (pt-0) -->
         <div class="container mx-auto px-4 pt-0 pb-20 max-w-[95%]">
@@ -512,13 +518,22 @@
                 const parts = dateStr.split('-');
                 if (parts.length !== 3) return dateStr;
                 return `${parts[0] - 1911}/${parts[1]}/${parts[2]}`;
+            },
+            updateClock: () => {
+                // 每秒更新全螢幕模式下的時鐘
+                const el = document.getElementById('fs-current-time');
+                if (el) {
+                    const d = new Date();
+                    const pad = (n) => String(n).padStart(2, '0');
+                    el.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                }
             }
         };
 
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-     const firebaseConfig = {
+           const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -760,6 +775,10 @@
             init: () => {
                 // 自動更新底部版權年份 (民國年)
                 document.getElementById('footer-year').textContent = new Date().getFullYear() - 1911;
+
+                // 啟動全螢幕時鐘 (每秒更新一次)
+                UI.updateClock();
+                setInterval(UI.updateClock, 1000);
 
                 // 預設：首頁載入時自動選取「今天」的日期
                 const d = new Date();
