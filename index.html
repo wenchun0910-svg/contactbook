@@ -100,8 +100,8 @@
         .toast.show { transform: translateY(0); opacity: 1; }
         .toast.error { background: #fbcfe8; color: #143022; }
         
-        /* 標籤徽章粉筆風格：深色文字配亮粉筆底色 */
-        .tag-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; color: #143022 !important; display: inline-block; font-weight: bold; }
+        /* 標籤徽章粉筆風格：白色文字配陰影，確保在任何底色上都清晰 */
+        .tag-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; color: #ffffff !important; display: inline-block; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
         
         /* 編輯器相關樣式 */
         #entry-content:empty:before {
@@ -153,8 +153,8 @@
         </div>
     </header>
 
-    <!-- Admin Toolbar (深黑板綠協同工具列) -->
-    <div id="admin-toolbar" class="hidden bg-board-card text-washi shadow-sm border-b border-dashed border-white/20">
+    <!-- Admin Toolbar (深黑板綠協同工具列 - 已修正字體顏色為白色) -->
+    <div id="admin-toolbar" class="hidden bg-board-card text-white shadow-sm border-b border-dashed border-white/20">
         <div class="container mx-auto px-4 py-2 flex gap-4 text-sm overflow-x-auto">
             <button onclick="UI.openModal('entry-modal')" class="hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-plus"></i> 新增聯絡簿</button>
             <button id="btn-manage-users" onclick="UI.openModal('user-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-users"></i> 帳號管理</button>
@@ -943,7 +943,7 @@
                 // 5. 動態替換標籤為粉筆風格 Badge
                 State.tags.forEach(t => {
                     const safeTagName = UI.escapeHtml(t.name);
-                    const badgeHtml = `<span class="tag-badge whitespace-nowrap mx-1 relative -top-[1px] shadow-sm align-middle" style="background-color: ${t.color}; font-size: 0.85em; padding: 4px 10px; color: #143022 !important;">${safeTagName}</span>`;
+                    const badgeHtml = `<span class="tag-badge whitespace-nowrap mx-1 relative -top-[1px] shadow-sm align-middle" style="background-color: ${t.color}; font-size: 0.85em; padding: 4px 10px; color: #ffffff !important;">${safeTagName}</span>`;
                     const regex = new RegExp(`【${safeTagName}】`, 'g');
                     content = content.replace(regex, badgeHtml);
                 });
@@ -1206,7 +1206,7 @@
                         (entry.tags || []).forEach(tagId => {
                             const t = State.tags.find(x => x.id === tagId);
                             if(t && !entry.content.includes(`【${t.name}】`)) {
-                                legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-2 relative -top-[2px]" style="background-color: ${t.color}; font-size: 0.6em; padding: 6px 12px; color: #143022 !important;">${UI.escapeHtml(t.name)}</span>`;
+                                legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-2 relative -top-[2px]" style="background-color: ${t.color}; font-size: 0.6em; padding: 6px 12px; color: #ffffff !important;">${UI.escapeHtml(t.name)}</span>`;
                             }
                         });
                         return `
@@ -1331,7 +1331,7 @@
                     const linkTagsHtml = (link.tags || []).map(tagId => {
                         const t = State.tags.find(x => x.id === tagId);
                         if(!t) return '';
-                        return `<span class="tag-badge whitespace-nowrap" style="background-color: ${t.color}; color: #143022 !important;">${UI.escapeHtml(t.name)}</span>`;
+                        return `<span class="tag-badge whitespace-nowrap" style="background-color: ${t.color}; color: #ffffff !important;">${UI.escapeHtml(t.name)}</span>`;
                     }).join(' ');
 
                     return `
