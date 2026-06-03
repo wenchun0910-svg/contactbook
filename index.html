@@ -191,7 +191,7 @@
 
     </main>
 
-    <footer class="bg-sumi text-gray-400 text-center py-6 text-sm mt-auto">
+    <footer class="bg-wood text-sumi text-center py-6 text-sm mt-auto border-t-4 border-wood-dark">
         <p>© <span id="footer-year">2026</span> <span id="footer-system-title">和風學園 網路聯絡簿</span>. All rights reserved.</p>
     </footer>
 
@@ -274,17 +274,17 @@
 
     <!-- Fullscreen Presentation Modal -->
     <div id="fullscreen-modal" class="modal fixed inset-0 bg-washi z-[100] flex-col overflow-y-auto">
-        <div class="sticky top-0 bg-ao text-white p-4 shadow-md flex justify-between items-center z-20">
+        <div class="sticky top-0 bg-wood text-sumi p-4 shadow-md flex justify-between items-center z-20 border-b-8 border-wood-dark">
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-expand text-lg"></i>
-                <h2 class="text-lg md:text-xl font-serif font-bold tracking-normal">聯絡簿全螢幕展示</h2>
+                <i class="fa-solid fa-chalkboard text-lg text-ao"></i>
+                <h2 class="text-lg md:text-xl font-serif font-bold tracking-normal text-sumi">聯絡簿全螢幕展示</h2>
             </div>
             <!-- 加入 flex 容器包裝時鐘與關閉按鈕 -->
             <div class="flex items-center gap-4 md:gap-6">
-                <!-- 動態時鐘 (放大字體) -->
-                <div id="fs-current-time" class="text-2xl md:text-4xl font-bold font-mono tracking-widest opacity-90"></div>
+                <!-- 動態時鐘 (放大字體，改粉筆黃) -->
+                <div id="fs-current-time" class="text-2xl md:text-4xl font-bold font-mono tracking-widest opacity-90 text-ao"></div>
                 
-                <button onclick="UI.closeModal('fullscreen-modal')" class="text-white hover:bg-white/20 transition px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base font-bold flex items-center gap-2 border border-white/30">
+                <button onclick="UI.closeModal('fullscreen-modal')" class="bg-washi text-ao border border-ao hover:bg-ao hover:text-washi transition px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base font-bold flex items-center gap-2">
                     <i class="fa-solid fa-times"></i> 關閉全螢幕
                 </button>
             </div>
@@ -533,7 +533,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-          const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
