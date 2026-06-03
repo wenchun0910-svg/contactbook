@@ -33,7 +33,11 @@
         }
     </script>
     <style>
-        body { background-color: #F9F6F0; color: #333333; }
+        body { 
+            background-color: #F9F6F0; 
+            color: #333333; 
+            background-image: url('https://www.transparenttextures.com/patterns/rice-paper.png'); /* 加入日式和紙紋理 */
+        }
         .japanese-border { border: 2px solid #4A6984; border-radius: 4px; position: relative; }
         .japanese-border::after {
             content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px;
@@ -109,13 +113,13 @@
         </div>
     </header>
 
-    <!-- Admin Toolbar (Hidden by default) -->
-    <div id="admin-toolbar" class="hidden bg-wood text-washi shadow-sm">
+    <!-- Admin Toolbar (改為深藍色主題) -->
+    <div id="admin-toolbar" class="hidden bg-ao-dark text-washi shadow-sm">
         <div class="container mx-auto px-4 py-2 flex gap-4 text-sm overflow-x-auto">
-            <button onclick="UI.openModal('entry-modal')" class="hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-plus"></i> 新增聯絡簿</button>
-            <button id="btn-manage-users" onclick="UI.openModal('user-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-users"></i> 帳號管理</button>
-            <button id="btn-manage-tags" onclick="UI.openModal('tag-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-tags"></i> 標籤管理</button>
-            <button id="btn-manage-links" onclick="UI.openModal('link-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-link"></i> 新增資源/文件</button>
+            <button onclick="UI.openModal('entry-modal')" class="hover:text-white transition flex items-center gap-1"><i class="fa-solid fa-plus"></i> 新增聯絡簿</button>
+            <button id="btn-manage-users" onclick="UI.openModal('user-modal')" class="hidden hover:text-white transition flex items-center gap-1"><i class="fa-solid fa-users"></i> 帳號管理</button>
+            <button id="btn-manage-tags" onclick="UI.openModal('tag-modal')" class="hidden hover:text-white transition flex items-center gap-1"><i class="fa-solid fa-tags"></i> 標籤管理</button>
+            <button id="btn-manage-links" onclick="UI.openModal('link-modal')" class="hidden hover:text-white transition flex items-center gap-1"><i class="fa-solid fa-link"></i> 新增資源/文件</button>
         </div>
     </div>
 
@@ -126,8 +130,8 @@
         <div class="w-full md:w-2/3 lg:w-3/4 flex flex-col gap-6">
             
             <!-- Important Links/Docs -->
-            <section class="bg-white p-5 rounded-lg shadow-sm border-t-4 border-wood">
-                <h2 class="text-xl font-serif text-wood mb-4 border-b border-gray-100 pb-2"><i class="fa-regular fa-folder-open mr-2"></i>重要文件與網站</h2>
+            <section class="bg-white p-5 rounded-lg shadow-sm border-t-4 border-ao">
+                <h2 class="text-xl font-serif text-ao mb-4 border-b border-gray-100 pb-2"><i class="fa-regular fa-folder-open mr-2"></i>重要文件與網站</h2>
                 <div id="links-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Links injected here -->
                     <div class="text-gray-400 text-sm">載入中...</div>
@@ -191,7 +195,7 @@
 
     </main>
 
-    <footer class="bg-wood text-sumi text-center py-6 text-sm mt-auto border-t-4 border-wood-dark">
+    <footer class="bg-ao-dark text-washi/80 text-center py-6 text-sm mt-auto border-t-4 border-ao">
         <p>© <span id="footer-year">2026</span> <span id="footer-system-title">和風學園 網路聯絡簿</span>. All rights reserved.</p>
     </footer>
 
@@ -274,17 +278,17 @@
 
     <!-- Fullscreen Presentation Modal -->
     <div id="fullscreen-modal" class="modal fixed inset-0 bg-washi z-[100] flex-col overflow-y-auto">
-        <div class="sticky top-0 bg-wood text-sumi p-4 shadow-md flex justify-between items-center z-20 border-b-8 border-wood-dark">
+        <div class="sticky top-0 bg-ao text-white p-4 shadow-md flex justify-between items-center z-20">
             <div class="flex items-center gap-2">
-                <i class="fa-solid fa-chalkboard text-lg text-ao"></i>
-                <h2 class="text-lg md:text-xl font-serif font-bold tracking-normal text-sumi">聯絡簿全螢幕展示</h2>
+                <i class="fa-solid fa-expand text-lg"></i>
+                <h2 class="text-lg md:text-xl font-serif font-bold tracking-normal text-white">聯絡簿全螢幕展示</h2>
             </div>
             <!-- 加入 flex 容器包裝時鐘與關閉按鈕 -->
             <div class="flex items-center gap-4 md:gap-6">
-                <!-- 動態時鐘 (放大字體，改粉筆黃) -->
-                <div id="fs-current-time" class="text-2xl md:text-4xl font-bold font-mono tracking-widest opacity-90 text-ao"></div>
+                <!-- 動態時鐘 -->
+                <div id="fs-current-time" class="text-2xl md:text-4xl font-bold font-mono tracking-widest opacity-90 text-white"></div>
                 
-                <button onclick="UI.closeModal('fullscreen-modal')" class="bg-washi text-ao border border-ao hover:bg-ao hover:text-washi transition px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base font-bold flex items-center gap-2">
+                <button onclick="UI.closeModal('fullscreen-modal')" class="text-white hover:bg-white/20 transition px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base font-bold flex items-center gap-2 border border-white/30">
                     <i class="fa-solid fa-times"></i> 關閉全螢幕
                 </button>
             </div>
@@ -300,7 +304,7 @@
 
     <!-- User Management Modal -->
     <div id="user-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
-        <div class="bg-washi rounded-lg shadow-xl w-full max-w-3xl flex flex-col border-t-4 border-wood">
+        <div class="bg-washi rounded-lg shadow-xl w-full max-w-3xl flex flex-col border-t-4 border-ao">
             <div class="p-4 border-b flex justify-between items-center bg-white">
                 <h2 class="text-xl font-serif text-sumi font-bold">帳號管理 (僅管理員)</h2>
                 <button onclick="UI.closeModal('user-modal')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-times text-xl"></i></button>
@@ -317,7 +321,7 @@
                             <option value="collaborator">協作者 (僅能管理自己內容)</option>
                             <option value="admin">管理員 (全部權限)</option>
                         </select>
-                        <button type="submit" class="w-full bg-wood text-white py-2 rounded text-sm hover:bg-opacity-90">新增</button>
+                        <button type="submit" class="w-full bg-ao text-white py-2 rounded text-sm hover:bg-opacity-90">新增</button>
                     </form>
                 </div>
                 <!-- User List -->
@@ -362,7 +366,7 @@
 
     <!-- Links/Docs Management Modal -->
     <div id="link-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
-        <div class="bg-washi rounded-lg shadow-xl w-full max-w-lg max-h-[95vh] flex flex-col border-t-4 border-wood">
+        <div class="bg-washi rounded-lg shadow-xl w-full max-w-lg max-h-[95vh] flex flex-col border-t-4 border-ao">
             <div class="p-4 border-b flex justify-between items-center bg-white shrink-0">
                 <h2 id="link-modal-title" class="text-xl font-serif text-sumi font-bold">新增資源/文件連結</h2>
                 <button onclick="UI.closeModal('link-modal')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-times text-xl"></i></button>
@@ -396,7 +400,7 @@
                         <input type="url" id="link-url" required placeholder="https://..." class="w-full px-2 py-1.5 border rounded focus:border-ao focus:outline-none">
                     </div>
                     <div class="flex justify-end pt-2 shrink-0">
-                        <button type="submit" class="bg-wood text-white px-6 py-2 rounded hover:bg-opacity-90 transition">儲存</button>
+                        <button type="submit" class="bg-ao text-white px-6 py-2 rounded hover:bg-opacity-90 transition">儲存</button>
                     </div>
                 </form>
             </div>
@@ -533,7 +537,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-   const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1293,7 +1297,7 @@
 
                 container.innerHTML = sorted.map(link => {
                     // 將 PDF 圖示改為通用的文件圖示 (fa-file-lines)
-                    const icon = link.type === 'document' ? 'fa-file-lines text-sakura' : 'fa-globe text-wood';
+                    const icon = link.type === 'document' ? 'fa-file-lines text-sakura' : 'fa-globe text-ao-dark';
                     const isExpired = link.expireDate && link.expireDate < todayStr;
                     
                     // Render tags
@@ -1397,7 +1401,7 @@
                         <td class="p-2">${UI.escapeHtml(u.name)}</td>
                         <td class="p-2">${UI.escapeHtml(u.account)}</td>
                         <td class="p-2">
-                            <span class="px-2 py-1 rounded text-xs ${u.role === 'admin' ? 'bg-wood text-white' : 'bg-gray-200'}">
+                            <span class="px-2 py-1 rounded text-xs ${u.role === 'admin' ? 'bg-ao text-white' : 'bg-gray-200'}">
                                 ${u.role === 'admin' ? '管理員' : '協作者'}
                             </span>
                         </td>
