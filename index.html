@@ -582,7 +582,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-                const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1008,6 +1008,7 @@
                         await API.updateDoc('entries', id, data);
                         UI.showToast("更新成功");
                     } else {
+                        data.views = 0; // 新增聯絡簿時，預設瀏覽人次為 0
                         await API.addDoc('entries', data);
                         UI.showToast("新增成功");
                     }
@@ -1047,9 +1048,6 @@
                 if (footerTitleEl) footerTitleEl.textContent = systemTitle;
                 
                 document.title = systemTitle;
-                
-                const viewsEls = document.querySelectorAll('.page-views-text');
-                viewsEls.forEach(el => el.textContent = State.system.views || 0);
             },
             editSystemTitle: () => {
                 if (!State.currentUser || State.currentUser.role !== 'admin' || !State.system) return;
@@ -1072,20 +1070,7 @@
                 // Apply Date Filter
                 if (State.selectedDate) {
                     filtered = filtered.filter(e => e.date === State.selectedDate);
-                    const filterText = document.getElementById('current-filter-text');
-                    filterText.textContent = `篩選日期：${UI.toMinguo(State.selectedDate)}`;
-                    filterText.classList.remove('hidden');
-                } else {
-                    const filterText = document.getElementById('current-filter-text');
-                    filterText.classList.add('hidden');
                 }
-
-                let latestTimestamp = 0;
-                if (State.entries.length > 0) {
-                    latestTimestamp = Math.max(...State.entries.map(e => e.timestamp || 0));
-                }
-                const timeStr = latestTimestamp ? UI.formatDateTime(latestTimestamp) : '--/--/-- --:--';
-                const viewsCount = State.system ? (State.system.views || 0) : 0;
 
                 if (filtered.length === 0) {
                     container.innerHTML = `<div class="text-center py-10 text-gray-400">沒有符合的聯絡簿資料</div>`;
@@ -1096,6 +1081,10 @@
                     const canEdit = !State.isGuest && (State.currentUser.role === 'admin' || State.currentUser.id === entry.authorId);
                     const formattedContent = App.formatContentWithTags(entry.content);
                     
+                    // 取得專屬於這則聯絡簿的更新時間與觀看次數
+                    const entryViews = entry.views || 0;
+                    const entryTimeStr = UI.formatDateTime(entry.timestamp);
+                    
                     let legacyTagsHtml = '';
                     (entry.tags || []).forEach(tagId => {
                         const t = State.tags.find(x => x.id === tagId);
@@ -1105,7 +1094,7 @@
                     });
 
                     return `
-                        <article class="bg-board-card p-5 rounded-lg shadow-sm border border-dashed border-white/20 flex flex-col gap-3 relative overflow-hidden group">
+                        <article data-entry-id="${entry.id}" class="entry-card bg-board-card p-5 rounded-lg shadow-sm border border-dashed border-white/20 flex flex-col gap-3 relative overflow-hidden group">
                             <!-- Left Chalk Accent Line -->
                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-ao opacity-80"></div>
                             
@@ -1118,8 +1107,8 @@
                                     
                                     <!-- 資訊列：自動推到最右側 -->
                                     <div class="ml-auto hidden sm:flex text-gray-300 text-[13px] gap-4 items-center font-sans tracking-wide">
-                                        <span class="whitespace-nowrap">最後更新: <span class="text-gray-400 last-updated-text">${timeStr}</span></span>
-                                        <span class="whitespace-nowrap">瀏覽人次: <span class="font-bold text-yellow-100 page-views-text">${viewsCount}</span></span>
+                                        <span class="whitespace-nowrap">最後更新: <span class="text-gray-400">${entryTimeStr}</span></span>
+                                        <span class="whitespace-nowrap">瀏覽人次: <span class="font-bold text-yellow-100">${entryViews}</span></span>
                                     </div>
                                 </div>
                                 ${canEdit ? `
@@ -1140,6 +1129,30 @@
                         </article>
                     `;
                 }).join('');
+
+                // 啟動觀察器：當聯絡簿卡片滾動到畫面中時，才增加該則聯絡簿的觀看次數
+                setTimeout(() => {
+                    const observer = new IntersectionObserver((entries, obs) => {
+                        entries.forEach(change => {
+                            if (change.isIntersecting) {
+                                const id = change.target.getAttribute('data-entry-id');
+                                const viewedKey = 'entry_viewed_' + id;
+                                // 確保同一個瀏覽器 session (無痕或重開瀏覽器前) 內，每一篇只會+1次，避免重複灌水
+                                if (!sessionStorage.getItem(viewedKey)) {
+                                    sessionStorage.setItem(viewedKey, 'true');
+                                    const entryData = State.entries.find(e => e.id === id);
+                                    if (entryData) {
+                                        API.updateDoc('entries', id, { views: (entryData.views || 0) + 1 }).catch(()=>{});
+                                    }
+                                }
+                                // 紀錄過後就取消觀察這則聯絡簿，節省效能
+                                obs.unobserve(change.target);
+                            }
+                        });
+                    }, { threshold: 0.2 });
+                    
+                    document.querySelectorAll('.entry-card').forEach(card => observer.observe(card));
+                }, 100);
             },
             showFullscreen: (id) => {
                 const baseEntry = State.entries.find(e => e.id === id);
