@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>605聯絡簿</title>
+    <title>和風學園 - 教室黑板聯絡簿</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
@@ -197,19 +197,6 @@
         <div class="w-full md:w-1/3 lg:w-1/4">
             <div class="sticky top-4 flex flex-col gap-4">
                 
-                <!-- Info & Search Block -->
-                <div class="bg-board-card rounded-lg shadow-sm border-2 border-dashed border-white/20 p-4">
-                    <!-- Search Bar -->
-                    <div class="flex gap-2">
-                        <div class="relative flex-grow">
-                            <i class="fa-solid fa-search absolute left-3 top-[10px] text-gray-400 text-sm"></i>
-                            <input type="text" id="search-input" placeholder="搜尋聯絡簿內容..." class="w-full pl-8 pr-2 py-1.5 text-sm rounded border border-gray-300 focus:outline-none focus:border-ao focus:ring-1 focus:ring-ao bg-white">
-                        </div>
-                        <button onclick="App.renderEntries()" class="bg-ao text-washi px-3 py-1.5 text-sm rounded hover:bg-ao-dark transition whitespace-nowrap">搜尋</button>
-                    </div>
-                    <button id="btn-clear-filter" onclick="App.clearFilters()" class="hidden w-full mt-2 bg-gray-600 text-white px-3 py-1.5 text-sm rounded hover:bg-gray-700 transition">清除篩選</button>
-                </div>
-
                 <!-- Calendar -->
                 <div class="bg-board-card rounded-lg shadow-sm border-2 border-dashed border-white/20 overflow-hidden">
                     <div class="bg-ao-dark text-washi p-3 flex justify-between items-center font-bold">
@@ -595,7 +582,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-             const firebaseConfig = {
+                const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -845,11 +832,6 @@
                 const btnPasswordModal = document.getElementById('btn-password-modal');
                 if(btnPasswordModal) btnPasswordModal.addEventListener('click', () => UI.openModal('password-modal'));
                 
-                document.getElementById('search-input').addEventListener('input', (e) => {
-                    State.searchQuery = e.target.value;
-                    App.renderEntries();
-                });
-
                 App.startListeners();
             },
             startListeners: () => {
@@ -1087,28 +1069,15 @@
                     return b.timestamp - a.timestamp;
                 });
 
-                // Apply Search Filter
-                if (State.searchQuery) {
-                    const q = State.searchQuery.toLowerCase();
-                    filtered = filtered.filter(e => 
-                        (e.title && e.title.toLowerCase().includes(q)) || 
-                        e.content.toLowerCase().includes(q)
-                    );
-                }
-
                 // Apply Date Filter
                 if (State.selectedDate) {
                     filtered = filtered.filter(e => e.date === State.selectedDate);
                     const filterText = document.getElementById('current-filter-text');
                     filterText.textContent = `篩選日期：${UI.toMinguo(State.selectedDate)}`;
                     filterText.classList.remove('hidden');
-                    document.getElementById('btn-clear-filter').classList.remove('hidden');
                 } else {
                     const filterText = document.getElementById('current-filter-text');
-                    filterText.textContent = State.searchQuery ? `搜尋結果` : `顯示全部`;
-                    if(State.searchQuery) filterText.classList.remove('hidden');
-                    else filterText.classList.add('hidden');
-                    document.getElementById('btn-clear-filter').classList.add('hidden');
+                    filterText.classList.add('hidden');
                 }
 
                 let latestTimestamp = 0;
@@ -1241,13 +1210,6 @@
                 fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
                 
                 UI.openModal('fullscreen-modal');
-            },
-            clearFilters: () => {
-                State.selectedDate = null;
-                State.searchQuery = '';
-                document.getElementById('search-input').value = '';
-                App.renderEntries();
-                Calendar.render();
             },
 
             // --- Links/Docs ---
