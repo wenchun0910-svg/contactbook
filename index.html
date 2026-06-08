@@ -113,14 +113,14 @@
         /* 讓編輯器與內容內的超連結有明顯樣式 (天藍色粉筆色) */
         a, #entry-content a { color: #7dd3fc !important; text-decoration: underline; font-weight: bold; }
         
-        /* 修正 Tailwind 重置，讓文字編輯器的字體大小生效 */
-        font[size="1"] { font-size: 0.75em; }
-        font[size="2"] { font-size: 0.875em; }
-        font[size="3"] { font-size: 1em; }
-        font[size="4"] { font-size: 1.125em; }
-        font[size="5"] { font-size: 1.5em; }
-        font[size="6"] { font-size: 2em; }
-        font[size="7"] { font-size: 3em; }
+        /* 修正 Tailwind 重置，讓文字編輯器的字體大小生效 (對應 1~7 等級為具體 px) */
+        font[size="1"] { font-size: 12px; }
+        font[size="2"] { font-size: 14px; }
+        font[size="3"] { font-size: 16px; }
+        font[size="4"] { font-size: 18px; }
+        font[size="5"] { font-size: 20px; }
+        font[size="6"] { font-size: 24px; }
+        font[size="7"] { font-size: 36px; }
     </style>
 </head>
 <body class="font-sans min-h-screen flex flex-col">
@@ -294,9 +294,13 @@
                         <div class="flex flex-wrap gap-2 mb-2 p-1.5 border rounded bg-black/30 items-center border-dashed border-white/20">
                             <select onchange="document.execCommand('fontSize', false, this.value); this.selectedIndex=0;" class="border rounded px-2 py-1 text-sm focus:outline-none focus:border-ao cursor-pointer">
                                 <option value="">字體大小</option>
-                                <option value="3">一般</option>
-                                <option value="5">大</option>
-                                <option value="7">特大</option>
+                                <option value="1">12</option>
+                                <option value="2">14</option>
+                                <option value="3">16</option>
+                                <option value="4">18</option>
+                                <option value="5">20</option>
+                                <option value="6">24</option>
+                                <option value="7">36</option>
                             </select>
                             <div class="flex items-center gap-1 bg-black/40 border border-dashed border-white/20 rounded px-1">
                                 <span class="text-xs text-gray-300 pl-1">顏色:</span>
@@ -582,7 +586,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-        const firebaseConfig = {
+            const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -887,8 +891,8 @@
                     let style = '';
                     const sizeMatch = attrs.match(/size=["']?(\d)["']?/i);
                     if (sizeMatch) {
-                        const sizes = {'1':'0.75em', '2':'0.875em', '3':'1em', '4':'1.125em', '5':'1.5em', '6':'2em', '7':'3em'};
-                        style += `font-size: ${sizes[sizeMatch[1]] || '1em'} !important; `;
+                        const sizes = {'1':'12px', '2':'14px', '3':'16px', '4':'18px', '5':'20px', '6':'24px', '7':'36px'};
+                        style += `font-size: ${sizes[sizeMatch[1]] || '16px'} !important; `;
                     }
                     const colorMatch = attrs.match(/color=["']?([^"'\s>]+)["']?/i);
                     if (colorMatch) {
