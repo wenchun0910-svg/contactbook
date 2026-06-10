@@ -103,6 +103,13 @@
         /* 標籤徽章粉筆風格：白色文字配陰影，確保在任何底色上都清晰 */
         .tag-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; color: #ffffff !important; display: inline-block; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
         
+        /* 引入芫荽注音體 (優先使用本機字體，若無則從 CDN 載入) */
+        @font-face {
+            font-family: 'BpmfIansui';
+            src: local('BpmfIansui'), local('芫荽注音體'), url('https://cdn.jsdelivr.net/gh/max32002/bpmf@master/BpmfIansui-Regular.ttf') format('truetype');
+            font-display: swap;
+        }
+        
         /* 編輯器相關樣式 */
         #entry-content:empty:before {
             content: attr(data-placeholder);
@@ -110,6 +117,12 @@
             pointer-events: none;
             display: block;
         }
+        /* 在編輯器內預覽注音體時，確保給予足夠的行高以顯示注音 */
+        #entry-content font[face="BpmfIansui"] {
+            line-height: 2.2;
+            display: inline-block;
+        }
+        
         /* 讓編輯器與內容內的超連結有明顯樣式 (天藍色粉筆色) */
         a, #entry-content a { color: #7dd3fc !important; text-decoration: underline; font-weight: bold; }
         
@@ -292,6 +305,13 @@
                         
                         <!-- 簡易文字編輯器工具列 -->
                         <div class="flex flex-wrap gap-2 mb-2 p-1.5 border rounded bg-black/30 items-center border-dashed border-white/20">
+                            <!-- 字型選擇器 -->
+                            <select onchange="document.execCommand('fontName', false, this.value); this.selectedIndex=0;" class="border rounded px-2 py-1 text-sm focus:outline-none focus:border-ao cursor-pointer">
+                                <option value="">字型</option>
+                                <option value="Klee One">預設粉筆字</option>
+                                <option value="BpmfIansui">芫荽注音體</option>
+                            </select>
+                            
                             <select onchange="document.execCommand('fontSize', false, this.value); this.selectedIndex=0;" class="border rounded px-2 py-1 text-sm focus:outline-none focus:border-ao cursor-pointer">
                                 <option value="">字體大小</option>
                                 <option value="1">12</option>
@@ -586,7 +606,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-            const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -897,6 +917,15 @@
                     const colorMatch = attrs.match(/color=["']?([^"'\s>]+)["']?/i);
                     if (colorMatch) {
                         style += `color: ${colorMatch[1]} !important; `;
+                    }
+                    const faceMatch = attrs.match(/face=["']?([^"'>]+)["']?/i);
+                    if (faceMatch) {
+                        const fontName = faceMatch[1].trim();
+                        style += `font-family: '${fontName}', 'Klee One', sans-serif !important; `;
+                        // 若為注音體，自動加上較大的行高避免注音符號被切掉
+                        if (fontName.includes('BpmfIansui')) {
+                            style += `line-height: 2.2 !important; display: inline-block; `;
+                        }
                     }
                     return `<span style="${style}">`;
                 }).replace(/<\/font>/gi, '</span>');
