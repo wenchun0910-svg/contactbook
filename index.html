@@ -36,6 +36,9 @@
         }
     </script>
     <style>
+        /* 優先引入 Google Fonts 雲端字體庫 (含芫荽注音體 Bpmf Iansui) */
+        @import url('https://fonts.googleapis.com/css2?family=Bpmf+Iansui&display=swap');
+
         body { 
             background-color: #143022; 
             color: #f3f4f6; 
@@ -103,10 +106,11 @@
         /* 標籤徽章粉筆風格：白色文字配陰影，確保在任何底色上都清晰 */
         .tag-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; color: #ffffff !important; display: inline-block; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
         
-        /* 引入芫荽注音體 (優先使用本機字體，若無則從 CDN 載入) */
+        /* 引入芫荽注音體 (Google Fonts 失敗時的本地與 CDN WOFF2 輕量壓縮版備援) */
         @font-face {
-            font-family: 'BpmfIansui';
-            src: local('BpmfIansui'), local('芫荽注音體'), url('https://cdn.jsdelivr.net/gh/max32002/bpmf@master/BpmfIansui-Regular.ttf') format('truetype');
+            font-family: 'Bpmf Iansui';
+            src: local('Bpmf Iansui'), local('BpmfIansui'), local('芫荽注音體'), 
+                 url('https://cdn.jsdelivr.net/gh/max32002/bpmf@master/webfonts/BpmfIansui-Regular.woff2') format('woff2');
             font-display: swap;
         }
         
@@ -118,7 +122,7 @@
             display: block;
         }
         /* 在編輯器內預覽注音體時，確保給予足夠的行高以顯示注音 */
-        #entry-content font[face="BpmfIansui"] {
+        #entry-content font[face*="Bpmf"] {
             line-height: 2.2;
             display: inline-block;
         }
@@ -309,7 +313,7 @@
                             <select onchange="document.execCommand('fontName', false, this.value); this.selectedIndex=0;" class="border rounded px-2 py-1 text-sm focus:outline-none focus:border-ao cursor-pointer">
                                 <option value="">字型</option>
                                 <option value="Klee One">預設粉筆字</option>
-                                <option value="BpmfIansui">芫荽注音體</option>
+                                <option value="Bpmf Iansui">芫荽注音體</option>
                             </select>
                             
                             <select onchange="document.execCommand('fontSize', false, this.value); this.selectedIndex=0;" class="border rounded px-2 py-1 text-sm focus:outline-none focus:border-ao cursor-pointer">
@@ -606,7 +610,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-const firebaseConfig = {
+     const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -918,15 +922,26 @@ const firebaseConfig = {
                     if (colorMatch) {
                         style += `color: ${colorMatch[1]} !important; `;
                     }
-                    const faceMatch = attrs.match(/face=["']?([^"'>]+)["']?/i);
-                    if (faceMatch) {
-                        const fontName = faceMatch[1].trim();
+                    
+                    // 更嚴謹的解析 fontName，避免空白與引號的干擾
+                    let fontName = '';
+                    const faceMatch1 = attrs.match(/face\s*=\s*["']([^"']+)["']/i);
+                    const faceMatch2 = attrs.match(/face\s*=\s*([^"'\s>]+)/i);
+                    if (faceMatch1) {
+                        fontName = faceMatch1[1].trim();
+                    } else if (faceMatch2) {
+                        fontName = faceMatch2[1].trim();
+                    }
+                    
+                    if (fontName) {
+                        fontName = fontName.replace(/['"]/g, ''); // 清除多餘單雙引號
                         style += `font-family: '${fontName}', 'Klee One', sans-serif !important; `;
                         // 若為注音體，自動加上較大的行高避免注音符號被切掉
-                        if (fontName.includes('BpmfIansui')) {
+                        if (fontName.includes('Bpmf')) {
                             style += `line-height: 2.2 !important; display: inline-block; `;
                         }
                     }
+                    
                     return `<span style="${style}">`;
                 }).replace(/<\/font>/gi, '</span>');
             },
