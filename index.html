@@ -610,7 +610,7 @@
         // =========================================================
         // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
         // =========================================================
-     const firebaseConfig = {
+         const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1263,12 +1263,20 @@
                 };
 
                 const fsContainer = document.getElementById('fs-container');
-                fsContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch";
                 
                 const todayTitle = `${UI.toMinguo(baseDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(baseDateStr)}</span>`;
                 const tomorrowTitle = `${UI.toMinguo(nextDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-lg md:text-xl text-sakura ml-2 font-normal">(明日)</span>`;
 
-                fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
+                // 判斷隔天是否有聯絡簿，動態切換排版
+                if (tomorrowEntries.length === 0) {
+                    // 若隔天無資料，則改為單欄置中大版面呈現
+                    fsContainer.className = "grid grid-cols-1 max-w-5xl mx-auto gap-6 md:gap-10 items-stretch";
+                    fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries);
+                } else {
+                    // 若有資料，則維持雙欄呈現
+                    fsContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch";
+                    fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
+                }
                 
                 UI.openModal('fullscreen-modal');
             },
