@@ -612,7 +612,7 @@
             }
         };
 
-             const firebaseConfig = {
+                const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1235,7 +1235,7 @@
                                 <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-tight mb-5 pb-4 border-b-2 border-dashed border-ao/30 flex items-center gap-2 shrink-0">
                                     <i class="fa-regular fa-calendar-check"></i> ${title}
                                 </div>
-                                <div class="vertical-text-layout" style="${isSingle ? 'height: 60vh;' : 'height: 32vh;'}">
+                                <div class="vertical-text-layout" style="height: 65vh;">
                                     ${contentHtml}
                                 </div>
                             </div>
@@ -1261,12 +1261,9 @@
                 const tomorrowTitle = `${UI.toMinguo(nextDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-lg md:text-xl text-sakura ml-2 font-normal">(明日)</span>`;
 
                 if (isVertical) {
+                    // 直式排版：強制只展示當天一天的聯絡簿，給予充足的版面空間
                     fsContainer.className = "flex flex-col max-w-5xl mx-auto gap-6 md:gap-8 items-stretch w-full";
-                    if (isSingle) {
-                        fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries);
-                    } else {
-                        fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
-                    }
+                    fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries);
                 } else {
                     if (isSingle) {
                         fsContainer.className = "grid grid-cols-1 max-w-5xl mx-auto gap-6 md:gap-10 items-stretch";
@@ -1540,4 +1537,5 @@
 
     </script>
 </body>
+</html>
 </html>
