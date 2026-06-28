@@ -645,7 +645,7 @@
             }
         };
 
-               const firebaseConfig = {
+           const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1297,15 +1297,15 @@
                                     <div class="text-gray-400 text-sm md:text-base ml-4 flex items-center gap-2 shrink-0 border-l border-dashed border-ao/30 pl-2">
                                         <i class="fa-solid fa-user-pen rotate-90"></i> 發布者: ${UI.escapeHtml(entry.authorName)}
                                     </div>
-                                    <!-- 內容在左側 -->
-                                    <div class="text-lg md:text-2xl text-gray-200 font-sans tracking-widest content-auto-wrap mt-4" style="line-height: 2.5;">
+                                    <!-- 內容在左側 (行距縮小為 1.8) -->
+                                    <div class="text-lg md:text-2xl text-gray-200 font-sans tracking-widest content-auto-wrap mt-4" style="line-height: 1.8;">
                                         ${legacyTagsHtml}${formattedContent}
                                     </div>
                                 </div>
                             `;
                         } else {
                             return `
-                                <div class="mb-10 last:mb-0">
+                                <div class="mb-6 last:mb-0">
                                     <!-- 橫式排版：日期與發布者在同一行，以虛線墊底 -->
                                     <div class="flex items-baseline gap-4 mb-4 pb-4 border-b border-dashed border-ao/60 flex-wrap">
                                         <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-tight flex items-center gap-2 shrink-0">
@@ -1315,13 +1315,14 @@
                                             <i class="fa-solid fa-user-pen"></i> 發布者: ${UI.escapeHtml(entry.authorName)}
                                         </div>
                                     </div>
-                                    <div class="text-xl md:text-3xl text-gray-100 font-sans content-auto-wrap" style="line-height: 1.8;">
+                                    <!-- 內容 (行距縮小為 1.4) -->
+                                    <div class="text-xl md:text-3xl text-gray-100 font-sans content-auto-wrap" style="line-height: 1.4;">
                                         ${legacyTagsHtml}${formattedContent}
                                     </div>
                                 </div>
                             `;
                         }
-                    }).join(''); // 移除橫式的外部分隔線，改由上方 mb-10 隔開
+                    }).join(''); // 移除橫式的外部分隔線，改由上方 mb-6 隔開
 
                     if (isVertical) {
                         return `
