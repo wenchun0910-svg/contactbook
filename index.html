@@ -137,12 +137,17 @@
         /* 直式排版專用樣式 */
         .vertical-text-layout {
             writing-mode: vertical-rl;
-            text-orientation: upright;
+            text-orientation: mixed; /* 改回 mixed 讓標點符號自然旋轉與使用垂直版本 */
             width: 100%;
             overflow-x: auto;
             overflow-y: hidden;
             padding-bottom: 1rem;
             padding-top: 0.5rem;
+        }
+        .vertical-text-layout .tag-badge {
+            writing-mode: horizontal-tb;
+            display: inline-block;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
@@ -612,7 +617,7 @@
             }
         };
 
-               const firebaseConfig = {
+            const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -940,7 +945,7 @@
                 }).replace(/<\/font>/gi, '</span>');
             },
 
-            formatContentWithTags: (rawContent) => {
+            formatContentWithTags: (rawContent, isVertical = false) => {
                 let content = rawContent || '';
                 content = content.replace(/&lt;(\/?(?:font|span|div|br|p|b|i|u|strong|em|a)(?:\s+[^&>]*?)?)&gt;/gi, '<$1>');
                 if (!/<(?:br|div|p|h\d|ul|li|ol|table|tr|td|th)\b/i.test(content)) {
@@ -960,6 +965,44 @@
                     const regex = new RegExp(`【${safeTagName}】`, 'g');
                     content = content.replace(regex, badgeHtml);
                 });
+
+                // 針對直式排版，使用 DOM API 將英數字用獨立的 upright span 包覆，保留標點符號的自然旋轉
+                if (isVertical) {
+                    try {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = content;
+                        const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
+                        const nodesToReplace = [];
+                        let n;
+                        while (n = walker.nextNode()) {
+                            nodesToReplace.push(n);
+                        }
+                        nodesToReplace.forEach(node => {
+                            const text = node.nodeValue;
+                            if (/[0-9a-zA-Z]/.test(text)) {
+                                const parts = text.split(/([0-9a-zA-Z]+)/);
+                                const df = document.createDocumentFragment();
+                                parts.forEach((part, index) => {
+                                    if (part === '') return;
+                                    if (index % 2 === 1) { // 這是被配對到的英數字
+                                        const span = document.createElement('span');
+                                        span.style.textOrientation = 'upright';
+                                        span.textContent = part;
+                                        df.appendChild(span);
+                                    } else { // 其餘標點符號或中文字
+                                        df.appendChild(document.createTextNode(part));
+                                    }
+                                });
+                                node.parentNode.insertBefore(df, node);
+                                node.parentNode.removeChild(node);
+                            }
+                        });
+                        content = tempDiv.innerHTML;
+                    } catch (e) {
+                        console.error("處理直式文字時發生錯誤:", e);
+                    }
+                }
+
                 return content;
             },
 
@@ -1190,7 +1233,7 @@
                     }
                     
                     let contentHtml = entries.map(entry => {
-                        const formattedContent = App.formatContentWithTags(entry.content);
+                        const formattedContent = App.formatContentWithTags(entry.content, isVertical); // 傳入是否為直式
                         let legacyTagsHtml = '';
                         (entry.tags || []).forEach(tagId => {
                             const t = State.tags.find(x => x.id === tagId);
