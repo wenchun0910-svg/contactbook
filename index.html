@@ -645,7 +645,7 @@
             }
         };
 
-                const firebaseConfig = {
+               const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -1247,6 +1247,17 @@
                 
                 const isSingle = tomorrowEntries.length === 0;
 
+                // 處理直式排版時，日期數字需強制轉正
+                let displayDate = UI.toMinguo(baseDateStr);
+                let displayNextDate = UI.toMinguo(nextDateStr);
+                if (isVertical) {
+                    displayDate = displayDate.replace(/([0-9a-zA-Z]+)/g, '<span style="text-orientation: upright;">$1</span>');
+                    displayNextDate = displayNextDate.replace(/([0-9a-zA-Z]+)/g, '<span style="text-orientation: upright;">$1</span>');
+                }
+                
+                const todayTitle = `${displayDate} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(baseDateStr)}</span>`;
+                const tomorrowTitle = `${displayNextDate} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-lg md:text-xl text-sakura ml-2 font-normal">(明日)</span>`;
+
                 const renderFsSection = (title, entries) => {
                     if (entries.length === 0) {
                         return `
@@ -1278,10 +1289,16 @@
                         if (isVertical) {
                             return `
                                 <div class="ml-12 last:ml-0 flex flex-col h-full">
-                                    <div class="text-gray-400 text-sm md:text-base ml-4 flex items-center gap-2 shrink-0">
+                                    <!-- 直式排版：日期在最右側 (第一行) -->
+                                    <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-widest flex items-center gap-2 shrink-0 ml-4">
+                                        <i class="fa-regular fa-calendar-check"></i> ${title}
+                                    </div>
+                                    <!-- 發布者在第二行 -->
+                                    <div class="text-gray-400 text-sm md:text-base ml-4 flex items-center gap-2 shrink-0 border-l border-dashed border-ao/30 pl-2">
                                         <i class="fa-solid fa-user-pen rotate-90"></i> 發布者: ${UI.escapeHtml(entry.authorName)}
                                     </div>
-                                    <div class="text-lg md:text-2xl text-gray-200 font-sans tracking-widest content-auto-wrap" style="line-height: 2.5;">
+                                    <!-- 內容在左側 -->
+                                    <div class="text-lg md:text-2xl text-gray-200 font-sans tracking-widest content-auto-wrap mt-4" style="line-height: 2.5;">
                                         ${legacyTagsHtml}${formattedContent}
                                     </div>
                                 </div>
@@ -1289,8 +1306,14 @@
                         } else {
                             return `
                                 <div class="mb-10 last:mb-0">
-                                    <div class="text-gray-400 text-xs md:text-sm mb-4 flex items-center gap-2 shrink-0">
-                                        <i class="fa-solid fa-user-pen"></i> 發布者: ${UI.escapeHtml(entry.authorName)}
+                                    <!-- 橫式排版：日期與發布者在同一行，以虛線墊底 -->
+                                    <div class="flex items-baseline gap-4 mb-4 pb-4 border-b border-dashed border-ao/60 flex-wrap">
+                                        <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-tight flex items-center gap-2 shrink-0">
+                                            <i class="fa-regular fa-calendar-check"></i> ${title}
+                                        </div>
+                                        <div class="text-gray-400 text-sm md:text-base flex items-center gap-2 shrink-0">
+                                            <i class="fa-solid fa-user-pen"></i> 發布者: ${UI.escapeHtml(entry.authorName)}
+                                        </div>
                                     </div>
                                     <div class="text-xl md:text-3xl text-gray-100 font-sans content-auto-wrap" style="line-height: 1.8;">
                                         ${legacyTagsHtml}${formattedContent}
@@ -1298,27 +1321,21 @@
                                 </div>
                             `;
                         }
-                    }).join(isVertical ? '' : '<hr class="my-6 border-dashed border-ao/30">');
+                    }).join(''); // 移除橫式的外部分隔線，改由上方 mb-10 隔開
 
                     if (isVertical) {
                         return `
                             <div class="bg-board-card rounded-2xl shadow-xl p-0 border-2 border-dashed border-ao/50 relative overflow-hidden flex flex-col flex-grow h-full min-h-0">
                                 <div class="absolute top-0 left-0 right-0 h-2 bg-ao shrink-0"></div>
-                                <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-tight mb-2 pb-4 p-6 md:p-8 border-b-2 border-dashed border-ao/30 flex items-center gap-2 shrink-0">
-                                    <i class="fa-regular fa-calendar-check"></i> ${title}
-                                </div>
-                                <div class="vertical-text-layout flex-grow p-6 md:p-8 pt-0">
+                                <div class="vertical-text-layout flex-grow p-6 md:p-8">
                                     ${contentHtml}
                                 </div>
                             </div>
                         `;
                     } else {
-                        // 橫式完全還原附圖設計 (黃虛線外框、單條虛線分隔、無頂部實心黃條)
+                        // 橫式完全還原附圖設計
                         return `
                             <div class="bg-[#143022] rounded-xl shadow-xl p-0 border-2 border-dashed border-ao flex flex-col relative overflow-hidden h-full flex-grow min-h-0" style="background-image: url('https://www.transparenttextures.com/patterns/black-chalk.png');">
-                                <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-tight mb-2 pb-4 p-6 md:p-8 border-b border-dashed border-ao/60 flex items-center gap-2 shrink-0">
-                                    <i class="fa-regular fa-calendar-check"></i> ${title}
-                                </div>
                                 <div class="horizontal-text-layout">
                                     ${contentHtml}
                                 </div>
@@ -1329,11 +1346,8 @@
 
                 const fsContainer = document.getElementById('fs-container');
                 
-                const todayTitle = `${UI.toMinguo(baseDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(baseDateStr)}</span>`;
-                const tomorrowTitle = `${UI.toMinguo(nextDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-lg md:text-xl text-sakura ml-2 font-normal">(明日)</span>`;
-
                 if (isVertical) {
-                    // 直式排版：強制只展示當天一天的聯絡簿，給予充足的版面空間
+                    // 直式排版：強制只展示當天一天的聯絡簿
                     fsContainer.className = "flex flex-col max-w-5xl mx-auto gap-4 items-stretch w-full h-full flex-grow min-h-0";
                     fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries);
                 } else {
