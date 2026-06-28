@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>聯絡簿</title>
+    <title>和風學園 - 教室黑板聯絡簿</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: 引入超美的手寫粉筆感 Klee One 字體 -->
-    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -24,7 +22,7 @@
                         'sumi': '#f3f4f6',       // 白色粉筆色
                         'wood': '#854d0e',       // 木製槽原木色
                         'wood-dark': '#713f12',  // 深木色
-                        'board-card': '#1b3f2d',  // 稍亮一點的綠黑板色（用於卡片區塊）
+                        'board-card': '#1b3f2d', // 稍亮一點的綠黑板色（用於卡片區塊）
                         'chalk-blue': '#7dd3fc'  // 藍色粉筆色
                     },
                     fontFamily: {
@@ -36,8 +34,8 @@
         }
     </script>
     <style>
-        /* 優先引入 Google Fonts 雲端字體庫 (含芫荽注音體 Bpmf Iansui) */
-        @import url('https://fonts.googleapis.com/css2?family=Bpmf+Iansui&display=swap');
+        /* 優先引入 Google Fonts 雲端字體庫 (含 Klee One 粉筆字 與 Bpmf Iansui 芫荽注音體) */
+        @import url('https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Bpmf+Iansui&display=swap');
 
         body { 
             background-color: #143022; 
@@ -103,10 +101,7 @@
         .toast.show { transform: translateY(0); opacity: 1; }
         .toast.error { background: #fbcfe8; color: #143022; }
         
-        /* 標籤徽章粉筆風格：白色文字配陰影，確保在任何底色上都清晰 */
-        .tag-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; color: #ffffff !important; display: inline-block; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-        
-        /* 引入芫荽注音體 (Google Fonts 失敗時的本地與 CDN WOFF2 輕量壓縮版備援) */
+        /* 引入芫荽注音體備援機制 */
         @font-face {
             font-family: 'Bpmf Iansui';
             src: local('Bpmf Iansui'), local('BpmfIansui'), local('芫荽注音體'), 
@@ -138,6 +133,17 @@
         font[size="5"] { font-size: 20px; }
         font[size="6"] { font-size: 24px; }
         font[size="7"] { font-size: 36px; }
+
+        /* 直式排版專用樣式 */
+        .vertical-text-layout {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 1rem;
+            padding-top: 0.5rem;
+        }
     </style>
 </head>
 <body class="font-sans min-h-screen flex flex-col">
@@ -170,9 +176,9 @@
         </div>
     </header>
 
-    <!-- Admin Toolbar (深黑板綠協同工具列 - 已修正字體顏色為白色) -->
-    <div id="admin-toolbar" class="hidden bg-board-card text-white shadow-sm border-b border-dashed border-white/20">
-        <div class="container mx-auto px-4 py-2 flex gap-4 text-sm overflow-x-auto">
+    <!-- Admin Toolbar (深黑板綠協同工具列) -->
+    <div id="admin-toolbar" class="hidden bg-board-card text-washi shadow-sm border-b border-dashed border-white/20">
+        <div class="container mx-auto px-4 py-2 flex gap-4 text-sm overflow-x-auto text-white">
             <button onclick="UI.openModal('entry-modal')" class="hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-plus"></i> 新增聯絡簿</button>
             <button id="btn-manage-users" onclick="UI.openModal('user-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-users"></i> 帳號管理</button>
             <button id="btn-manage-tags" onclick="UI.openModal('tag-modal')" class="hidden hover:text-ao transition flex items-center gap-1"><i class="fa-solid fa-tags"></i> 標籤管理</button>
@@ -210,11 +216,11 @@
             </section>
         </div>
 
-        <!-- Right Column: Sidebar (Info & Calendar) -->
+        <!-- Right Column: Sidebar (Calendar) -->
         <div class="w-full md:w-1/3 lg:w-1/4">
             <div class="sticky top-4 flex flex-col gap-4">
                 
-                <!-- Calendar -->
+                <!-- Calendar (已移除搜尋框) -->
                 <div class="bg-board-card rounded-lg shadow-sm border-2 border-dashed border-white/20 overflow-hidden">
                     <div class="bg-ao-dark text-washi p-3 flex justify-between items-center font-bold">
                         <button onclick="Calendar.prevMonth()" class="hover:text-white"><i class="fa-solid fa-chevron-left"></i></button>
@@ -237,7 +243,7 @@
             </div>
         </div>
 
-        <!-- 🎨 粉筆夾與板擦收納槽 (完美結合並還原上傳的 image_e4b765.png 插圖！) -->
+        <!-- 🎨 粉筆夾與板擦收納槽 (還原黑板插圖！) -->
         <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-r from-amber-800 via-amber-700 to-amber-800 border-t-2 border-amber-900 flex items-center justify-start px-8 gap-4 select-none z-10 rounded-b shadow-inner">
             <!-- 白色粉筆 -->
             <div class="w-12 h-3 bg-slate-100 rounded-full rotate-6 shadow border-b border-slate-300" title="白色粉筆"></div>
@@ -247,13 +253,12 @@
             <div class="w-10 h-3 bg-yellow-200 rounded-full rotate-12 shadow border-b border-yellow-300" title="黃色粉筆"></div>
             <!-- 藍色粉筆 -->
             <div class="w-11 h-3 bg-sky-200 rounded-full -rotate-6 shadow border-b border-sky-300" title="藍色粉筆"></div>
-            <!-- 木製板擦 (橘黃底 + 黑頂毛氈，對應插圖設計) -->
+            <!-- 木製板擦 -->
             <div class="ml-auto w-20 h-5 bg-gradient-to-r from-amber-600 to-amber-500 rounded flex flex-col justify-between shadow border border-amber-700" title="板擦">
                 <div class="w-full h-1.5 bg-neutral-800 rounded-t"></div>
                 <div class="w-full h-1 bg-amber-800"></div>
             </div>
         </div>
-
     </main>
 
     <!-- Footer -->
@@ -326,6 +331,7 @@
                                 <option value="6">24</option>
                                 <option value="7">36</option>
                             </select>
+                            
                             <div class="flex items-center gap-1 bg-black/40 border border-dashed border-white/20 rounded px-1">
                                 <span class="text-xs text-gray-300 pl-1">顏色:</span>
                                 <input type="color" onchange="document.execCommand('foreColor', false, this.value)" title="文字顏色" class="w-7 h-7 p-0 border-0 cursor-pointer rounded bg-transparent">
@@ -337,7 +343,6 @@
                             <div class="h-6 w-px bg-white/20 mx-1"></div>
                             <button type="button" onclick="App.insertLink()" class="w-8 h-8 flex items-center justify-center bg-black/40 border border-dashed border-white/20 hover:bg-black/20 rounded text-white transition" title="插入超連結"><i class="fa-solid fa-link"></i></button>
                         </div>
-                        <!-- 取代原本的 textarea，改用 contenteditable 讓排版生效 -->
                         <div id="entry-content" contenteditable="true" data-placeholder="如：&#10;1. 數卷x1&#10;2. 國生字" class="w-full p-3 border rounded focus:border-ao focus:outline-none bg-white min-h-[200px] overflow-y-auto" style="line-height: 1.6;"></div>
                     </div>
                     <div class="flex justify-end gap-3 pt-2">
@@ -357,20 +362,23 @@
                 <h2 class="text-lg md:text-xl font-serif font-bold tracking-normal !text-sumi">聯絡簿全螢幕展示</h2>
             </div>
             <!-- 加入 flex 容器包裝時鐘與關閉按鈕 -->
-            <div class="flex items-center gap-4 md:gap-6">
+            <div class="flex items-center gap-3 md:gap-6">
                 <!-- 動態時鐘 -->
-                <div id="fs-current-time" class="text-2xl md:text-4xl font-bold font-mono tracking-widest opacity-90 text-ao"></div>
+                <div id="fs-current-time" class="text-xl md:text-4xl font-bold font-mono tracking-widest opacity-90 text-ao"></div>
                 
+                <button onclick="App.toggleFsLayout()" class="bg-board-card text-ao border border-ao/50 hover:bg-ao hover:text-washi transition px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-retweet"></i> <span class="hidden md:inline">切換直/橫式</span><span class="md:hidden">排版</span>
+                </button>
+
                 <button onclick="UI.closeModal('fullscreen-modal')" class="bg-washi text-ao border border-ao/50 hover:bg-ao hover:text-washi transition px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-times"></i> 關閉全螢幕
+                    <i class="fa-solid fa-times"></i> <span class="hidden md:inline">關閉全螢幕</span><span class="md:hidden">關閉</span>
                 </button>
             </div>
         </div>
-        <!-- 放寬容器寬度以容納雙欄，並移除上方間距 (pt-0) -->
+        <!-- 放寬容器寬度以容納雙欄 -->
         <div class="container mx-auto px-4 pt-4 pb-20 max-w-[95%]">
-            <!-- 雙欄內容將由 JS 動態注入於此 -->
+            <!-- 內容將由 JS 動態注入於此 -->
             <div id="fs-container">
-                <!-- Content Injected here -->
             </div>
         </div>
     </div>
@@ -390,7 +398,7 @@
                         <input type="text" id="new-user-account" placeholder="登入帳號" required class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none">
                         <input type="password" id="new-user-pass" placeholder="密碼" required class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none">
                         <input type="text" id="new-user-name" placeholder="顯示名稱 (如: 王老師)" required class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none">
-                        <select id="new-user-role" class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none bg-board-card">
+                        <select id="new-user-role" class="w-full p-2 border rounded text-sm focus:border-ao focus:outline-none bg-board-card text-white">
                             <option value="collaborator">協作者 (僅能管理自己內容)</option>
                             <option value="admin">管理員 (全部權限)</option>
                         </select>
@@ -401,7 +409,7 @@
                 <div class="w-full md:w-2/3 overflow-y-auto max-h-[400px]">
                     <table class="w-full text-left text-sm border-collapse">
                         <thead>
-                            <tr class="bg-white/5">
+                            <tr class="bg-white/5 text-white">
                                 <th class="p-2 border-b border-dashed border-white/10">名稱</th>
                                 <th class="p-2 border-b border-dashed border-white/10">帳號</th>
                                 <th class="p-2 border-b border-dashed border-white/10">權限</th>
@@ -421,7 +429,7 @@
     <div id="tag-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
         <div class="bg-board-card rounded-lg shadow-xl w-full max-w-lg flex flex-col border-t-4 border-sakura">
             <div class="p-4 border-b border-dashed border-white/10 flex justify-between items-center bg-board-card">
-                <h2 class="text-xl font-serif text-ao font-bold">標籤管理</h2>
+                <h2 class="text-xl font-serif text-ao font-bold text-white">標籤管理</h2>
                 <button onclick="UI.closeModal('tag-modal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
             <div class="px-6 pb-6 pt-3">
@@ -441,7 +449,7 @@
     <div id="link-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 justify-center items-center p-4">
         <div class="bg-board-card rounded-lg shadow-xl w-full max-w-lg max-h-[95vh] flex flex-col border-t-4 border-ao">
             <div class="p-4 border-b border-dashed border-white/10 flex justify-between items-center bg-board-card shrink-0">
-                <h2 id="link-modal-title" class="text-xl font-serif text-ao font-bold">新增資源/文件連結</h2>
+                <h2 id="link-modal-title" class="text-xl font-serif text-ao font-bold text-white">新增資源/文件連結</h2>
                 <button onclick="UI.closeModal('link-modal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
             <div class="px-6 pb-6 pt-3 overflow-y-auto">
@@ -449,7 +457,7 @@
                     <input type="hidden" id="link-id">
                     <div>
                         <label class="block text-sm font-bold mb-1 text-gray-200">類型</label>
-                        <select id="link-type" class="w-full px-2 py-1.5 border rounded focus:border-ao focus:outline-none bg-board-card">
+                        <select id="link-type" class="w-full px-2 py-1.5 border rounded focus:border-ao focus:outline-none bg-board-card text-white">
                             <option value="document">文件 (Document)</option>
                             <option value="website">網站 (Website)</option>
                         </select>
@@ -523,9 +531,10 @@
             tags: [],
             users: [],
             system: null,
-            searchQuery: '',
             selectedDate: null,
-            currentCalendarDate: new Date()
+            currentCalendarDate: new Date(),
+            isFullscreenVertical: false,
+            currentFsId: null
         };
 
         // UI Utilities
@@ -539,14 +548,11 @@
             openModal: (id) => {
                 document.getElementById(id).classList.add('active');
                 if(id === 'entry-modal' && !document.getElementById('entry-id').value) {
-                    
-                    // 若有在日曆點選特定日期，優先使用該日期，否則使用今天
                     let defaultDate = State.selectedDate;
                     if (!defaultDate) {
                         const d = new Date();
                         defaultDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                     }
-
                     document.getElementById('entry-date').value = defaultDate;
                     document.getElementById('entry-content').innerHTML = '';
                     document.getElementById('entry-content').focus();
@@ -597,7 +603,6 @@
                 return `${parts[0] - 1911}/${parts[1]}/${parts[2]}`;
             },
             updateClock: () => {
-                // 每秒更新全螢幕模式下的時鐘
                 const el = document.getElementById('fs-current-time');
                 if (el) {
                     const d = new Date();
@@ -607,10 +612,7 @@
             }
         };
 
-        // =========================================================
-        // ⚠️ 第 1 步：請將以下內容替換為您從 Firebase 後台取得的 Config ⚠️
-        // =========================================================
-         const firebaseConfig = {
+             const firebaseConfig = {
   apiKey: "AIzaSyB6NgZNLvexXfKwkW5eP4tNnkSHwuY8KyM",
   authDomain: "contactbook-c6d95.firebaseapp.com",
   projectId: "contactbook-c6d95",
@@ -619,13 +621,11 @@
   appId: "1:655576113880:web:15606f5cad291d8aca6dad"
 };
 
-        // =========================================================
-
+        
         let app, auth, db;
         let useMockDB = false;
         
         try {
-            // 檢查是否有填寫 apiKey，若無則使用本機模擬模式 (Local Storage)
             if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "您的 API KEY") {
                 useMockDB = true;
                 console.log("⚠️ 未檢測到有效的 Firebase 金鑰，已啟用【本機模擬資料庫模式】");
@@ -633,14 +633,11 @@
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-                console.log("✅ Firebase 初始化成功！");
             }
         } catch (e) {
             useMockDB = true;
-            console.error("Firebase 初始化發生錯誤，已切換回本機模擬模式:", e);
         }
 
-        // 本機模擬資料庫 (讓介面在無雲端庫狀態下仍可操作)
         const LocalDB = {
             data: JSON.parse(localStorage.getItem('mock_school_db')) || { entries: [], links: [], tags: [], users: [], system: [] },
             listeners: {},
@@ -662,14 +659,13 @@
             }
         };
 
-        // 資料庫 API 封裝 (自動判斷要用 Firebase 還是 LocalDB)
         window.API = {
             onSnapshot: (colName, cb) => {
                 if (useMockDB) {
                     LocalDB.listeners[colName] = cb;
                     setTimeout(() => LocalDB.trigger(colName), 0);
                 } else {
-                    onSnapshot(collection(db, colName), cb, (err) => console.error("Firestore 讀取錯誤:", err));
+                    onSnapshot(collection(db, colName), cb, (err) => console.error("Firestore Error:", err));
                 }
             },
             addDoc: async (colName, data) => {
@@ -686,17 +682,11 @@
             }
         };
 
-        // Authentication & User Management
         window.Auth = {
             init: async () => {
                 if (!useMockDB) {
-                    try { 
-                        await signInAnonymously(auth); 
-                    } catch (e) { 
-                        console.error("Firebase 匿名登入失敗，請確認是否於後台啟用匿名登入功能", e); 
-                    }
+                    try { await signInAnonymously(auth); } catch (e) {}
                 }
-                
                 const sessionData = sessionStorage.getItem('school_app_session');
                 if(sessionData) {
                     State.currentUser = JSON.parse(sessionData);
@@ -782,17 +772,13 @@
                 const name = document.getElementById('new-user-name').value;
                 const role = document.getElementById('new-user-role').value;
 
-                if(State.users.some(u => u.account === acc)) {
-                    return UI.showToast("帳號已存在", true);
-                }
+                if(State.users.some(u => u.account === acc)) return UI.showToast("帳號已存在", true);
 
                 try {
                     await API.addDoc('users', { account: acc, password: pass, name, role });
                     UI.showToast("帳號新增成功");
                     document.getElementById('user-form').reset();
-                } catch(e) {
-                    UI.showToast("新增失敗", true);
-                }
+                } catch(e) { UI.showToast("新增失敗", true); }
             },
             changePassword: async () => {
                 if (!State.currentUser) return;
@@ -801,20 +787,14 @@
                 const confirmPass = document.getElementById('confirm-password').value;
 
                 const userRecord = State.users.find(u => u.id === State.currentUser.id);
-                if (!userRecord || userRecord.password !== oldPass) {
-                    return UI.showToast("原密碼錯誤", true);
-                }
-                if (newPass !== confirmPass) {
-                    return UI.showToast("兩次輸入的新密碼不一致", true);
-                }
+                if (!userRecord || userRecord.password !== oldPass) return UI.showToast("原密碼錯誤", true);
+                if (newPass !== confirmPass) return UI.showToast("兩次輸入的新密碼不一致", true);
 
                 try {
                     await API.updateDoc('users', State.currentUser.id, { password: newPass });
                     UI.showToast("密碼修改成功");
                     UI.closeModal('password-modal');
-                } catch (e) {
-                    UI.showToast("密碼修改失敗", true);
-                }
+                } catch (e) { UI.showToast("密碼修改失敗", true); }
             },
             resetUserPassword: async (id) => {
                 if (!State.currentUser || State.currentUser.role !== 'admin') return;
@@ -823,9 +803,7 @@
                     try {
                         await API.updateDoc('users', id, { password: newPass.trim() });
                         UI.showToast("密碼已成功重設");
-                    } catch(e) {
-                        UI.showToast("重設失敗", true);
-                    }
+                    } catch(e) { UI.showToast("重設失敗", true); }
                 }
             },
             deleteUser: async (id) => {
@@ -835,23 +813,17 @@
                 try {
                     await API.deleteDoc('users', id);
                     UI.showToast("帳號已刪除");
-                } catch(e) {
-                    UI.showToast("刪除失敗", true);
-                }
+                } catch(e) { UI.showToast("刪除失敗", true); }
             }
         };
 
-        // Main App Logic
         window.App = {
             init: () => {
-                // 自動更新底部版權年份 (民國年)
                 document.getElementById('footer-year').textContent = new Date().getFullYear() - 1911;
 
-                // 啟動全螢幕時鐘 (每秒更新一次)
                 UI.updateClock();
                 setInterval(UI.updateClock, 1000);
 
-                // 預設：首頁載入時自動選取「今天」的日期
                 const d = new Date();
                 State.selectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
@@ -884,9 +856,7 @@
                 API.onSnapshot('users', async (snapshot) => {
                     State.users = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
                     if(State.users.length === 0) {
-                        try {
-                            await API.addDoc('users', { account: 'admin', password: 'admin', name: '系統管理員', role: 'admin' });
-                        } catch(e) {}
+                        try { await API.addDoc('users', { account: 'admin', password: 'admin', name: '系統管理員', role: 'admin' }); } catch(e) {}
                     }
                     App.renderUserList();
                 });
@@ -895,20 +865,46 @@
                     if (snapshot.docs.length === 0) {
                         if (!window.systemInitLock) {
                             window.systemInitLock = true;
-                            try { await API.addDoc('system', { title: '和風學園 網路聯絡簿', views: 1 }); } catch(e) {}
+                            try { await API.addDoc('system', { title: '和風學園 網路聯絡簿' }); } catch(e) {}
                         }
                     } else {
                         State.system = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
-                        if (!sessionStorage.getItem('has_viewed')) {
-                            sessionStorage.setItem('has_viewed', 'true');
-                            API.updateDoc('system', State.system.id, { views: (State.system.views || 0) + 1 });
-                        }
                         App.renderSystem();
                     }
                 });
             },
 
-            // 將舊式或瀏覽器產生的 <font> 標籤，強制轉換為絕對生效的 <span> inline-style
+            // 負責計數單篇聯絡簿觀看人次的 Observer
+            setupIntersectionObserver: () => {
+                if(window.entryObserver) {
+                    window.entryObserver.disconnect();
+                }
+                window.entryObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.getAttribute('data-entry-id');
+                            let viewedEntries = JSON.parse(sessionStorage.getItem('viewed_entries') || '[]');
+                            
+                            // 判斷如果在這次網頁開啟期間尚未觀看過這篇，則進行計數 +1
+                            if (id && !viewedEntries.includes(id)) {
+                                viewedEntries.push(id);
+                                sessionStorage.setItem('viewed_entries', JSON.stringify(viewedEntries));
+                                
+                                const entryData = State.entries.find(e => e.id === id);
+                                if (entryData) {
+                                    API.updateDoc('entries', id, { views: (entryData.views || 0) + 1 });
+                                }
+                            }
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.6 }); // 當文章有 60% 出現在畫面上時觸發計數
+
+                document.querySelectorAll('.entry-article').forEach(article => {
+                    window.entryObserver.observe(article);
+                });
+            },
+
             convertFontToSpan: (htmlStr) => {
                 if (!htmlStr) return '';
                 return htmlStr.replace(/<font\s+([^>]+)>/gi, (match, attrs) => {
@@ -923,7 +919,6 @@
                         style += `color: ${colorMatch[1]} !important; `;
                     }
                     
-                    // 更嚴謹的解析 fontName，避免空白與引號的干擾
                     let fontName = '';
                     const faceMatch1 = attrs.match(/face\s*=\s*["']([^"']+)["']/i);
                     const faceMatch2 = attrs.match(/face\s*=\s*([^"'\s>]+)/i);
@@ -934,9 +929,8 @@
                     }
                     
                     if (fontName) {
-                        fontName = fontName.replace(/['"]/g, ''); // 清除多餘單雙引號
+                        fontName = fontName.replace(/['"]/g, ''); 
                         style += `font-family: '${fontName}', 'Klee One', sans-serif !important; `;
-                        // 若為注音體，自動加上較大的行高避免注音符號被切掉
                         if (fontName.includes('Bpmf')) {
                             style += `line-height: 2.2 !important; display: inline-block; `;
                         }
@@ -946,34 +940,23 @@
                 }).replace(/<\/font>/gi, '</span>');
             },
 
-            // 處理內容標籤渲染 (共用於列表與全螢幕)
             formatContentWithTags: (rawContent) => {
                 let content = rawContent || '';
-                
-                // 1. 還原被意外變成純文字的 HTML 標籤 (增加對 a 標籤的支援)
                 content = content.replace(/&lt;(\/?(?:font|span|div|br|p|b|i|u|strong|em|a)(?:\s+[^&>]*?)?)&gt;/gi, '<$1>');
-                
-                // 2. 兼容舊版純文字：如果沒有包含任何區塊標籤，則將 \n 轉為 <br>
                 if (!/<(?:br|div|p|h\d|ul|li|ol|table|tr|td|th)\b/i.test(content)) {
                     content = content.replace(/\n/g, '<br>');
                 }
-                
-                // 3. 基本 XSS 防護
                 content = content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-                
-                // 4. 將 <font> 轉換為 <span> (解決 Tailwind CSS 覆蓋字體樣式的問題)
                 content = App.convertFontToSpan(content);
-
-                // 4.5 確保超連結具有 target="_blank" 並套用統一顯示樣式 (使用粉筆天藍色)
                 content = content.replace(/<a\s+href=["']([^"']+)["']([^>]*)>/gi, (match, url, rest) => {
                     let cleanRest = rest.replace(/\btarget=["'][^"']*["']/gi, '').replace(/\bclass=["'][^"']*["']/gi, '');
                     return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-sky-300 hover:text-sky-200 underline font-bold" ${cleanRest}>`;
                 });
                 
-                // 5. 動態替換標籤為粉筆風格 Badge
                 State.tags.forEach(t => {
                     const safeTagName = UI.escapeHtml(t.name);
-                    const badgeHtml = `<span class="tag-badge whitespace-nowrap mx-1 relative -top-[1px] shadow-sm align-middle" style="background-color: ${t.color}; font-size: 0.85em; padding: 4px 10px; color: #ffffff !important;">${safeTagName}</span>`;
+                    // 套用方正、白色字體的附圖樣式 Badge
+                    const badgeHtml = `<span class="tag-badge whitespace-nowrap mx-1 relative -top-[2px] shadow-sm align-middle" style="background-color: ${t.color}; font-size: 0.85em; padding: 4px 10px; border-radius: 6px; color: #ffffff !important;">${safeTagName}</span>`;
                     const regex = new RegExp(`【${safeTagName}】`, 'g');
                     content = content.replace(regex, badgeHtml);
                 });
@@ -996,13 +979,11 @@
             insertTagToContent: (tagName) => {
                 const editor = document.getElementById('entry-content');
                 const insertText = `【${tagName}】`;
-                
                 editor.focus();
                 
                 const selection = window.getSelection();
                 if (selection.getRangeAt && selection.rangeCount > 0) {
                     const range = selection.getRangeAt(0);
-                    
                     let isInside = false;
                     let node = range.commonAncestorContainer;
                     while(node) {
@@ -1014,7 +995,6 @@
                         range.deleteContents();
                         const textNode = document.createTextNode(insertText);
                         range.insertNode(textNode);
-                        
                         range.setStartAfter(textNode);
                         range.setEndAfter(textNode);
                         selection.removeAllRanges();
@@ -1024,7 +1004,6 @@
                 }
                 
                 editor.appendChild(document.createTextNode(insertText));
-                
                 const newRange = document.createRange();
                 newRange.selectNodeContents(editor);
                 newRange.collapse(false);
@@ -1048,7 +1027,8 @@
                     date, content, tags: selectedTags,
                     authorId: State.currentUser.id,
                     authorName: State.currentUser.name,
-                    timestamp: new Date().getTime()
+                    timestamp: new Date().getTime(),
+                    views: id ? undefined : 0 // 新增時預設 0 人次
                 };
 
                 try {
@@ -1056,14 +1036,11 @@
                         await API.updateDoc('entries', id, data);
                         UI.showToast("更新成功");
                     } else {
-                        data.views = 0; // 新增聯絡簿時，預設瀏覽人次為 0
                         await API.addDoc('entries', data);
                         UI.showToast("新增成功");
                     }
                     UI.closeModal('entry-modal');
-                } catch (e) {
-                    UI.showToast("儲存失敗", true);
-                }
+                } catch (e) { UI.showToast("儲存失敗", true); }
             },
             editEntry: (id) => {
                 const entry = State.entries.find(e => e.id === id);
@@ -1080,21 +1057,15 @@
                 try {
                     await API.deleteDoc('entries', id);
                     UI.showToast("已刪除");
-                } catch (e) {
-                    UI.showToast("刪除失敗", true);
-                }
+                } catch (e) { UI.showToast("刪除失敗", true); }
             },
             renderSystem: () => {
                 if (!State.system) return;
-                
                 const systemTitle = State.system.title || '和風學園 網路聯絡簿';
-                
                 const titleEl = document.getElementById('main-system-title');
                 if (titleEl) titleEl.textContent = systemTitle;
-                
                 const footerTitleEl = document.getElementById('footer-system-title');
                 if (footerTitleEl) footerTitleEl.textContent = systemTitle;
-                
                 document.title = systemTitle;
             },
             editSystemTitle: () => {
@@ -1109,15 +1080,20 @@
                 const container = document.getElementById('entries-container');
                 let filtered = [...State.entries];
 
-                // Sort by date desc, then timestamp
                 filtered.sort((a, b) => {
                     if (a.date !== b.date) return new Date(b.date) - new Date(a.date);
                     return b.timestamp - a.timestamp;
                 });
 
-                // Apply Date Filter
                 if (State.selectedDate) {
                     filtered = filtered.filter(e => e.date === State.selectedDate);
+                    const filterText = document.getElementById('current-filter-text');
+                    filterText.textContent = `篩選日期：${UI.toMinguo(State.selectedDate)}`;
+                    filterText.classList.remove('hidden');
+                } else {
+                    const filterText = document.getElementById('current-filter-text');
+                    filterText.textContent = `顯示全部`;
+                    filterText.classList.add('hidden');
                 }
 
                 if (filtered.length === 0) {
@@ -1129,21 +1105,20 @@
                     const canEdit = !State.isGuest && (State.currentUser.role === 'admin' || State.currentUser.id === entry.authorId);
                     const formattedContent = App.formatContentWithTags(entry.content);
                     
-                    // 取得專屬於這則聯絡簿的更新時間與觀看次數
-                    const entryViews = entry.views || 0;
-                    const entryTimeStr = UI.formatDateTime(entry.timestamp);
-                    
                     let legacyTagsHtml = '';
                     (entry.tags || []).forEach(tagId => {
                         const t = State.tags.find(x => x.id === tagId);
                         if(t && !entry.content.includes(`【${t.name}】`)) {
-                            legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-1 relative -top-[1px]" style="background-color: ${t.color}">${UI.escapeHtml(t.name)}</span>`;
+                            legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-1 relative -top-[1px]" style="background-color: ${t.color}; border-radius: 6px;">${UI.escapeHtml(t.name)}</span>`;
                         }
                     });
 
+                    // 取得獨立時間與人次
+                    const timeStr = entry.timestamp ? UI.formatDateTime(entry.timestamp) : '--/--/-- --:--';
+                    const viewsCount = entry.views || 0;
+
                     return `
-                        <article data-entry-id="${entry.id}" class="entry-card bg-board-card p-5 rounded-lg shadow-sm border border-dashed border-white/20 flex flex-col gap-3 relative overflow-hidden group">
-                            <!-- Left Chalk Accent Line -->
+                        <article class="entry-article bg-board-card p-5 rounded-lg shadow-sm border border-dashed border-white/20 flex flex-col gap-3 relative overflow-hidden group" data-entry-id="${entry.id}">
                             <div class="absolute left-0 top-0 bottom-0 w-1 bg-ao opacity-80"></div>
                             
                             <div class="flex justify-between items-start relative">
@@ -1153,10 +1128,9 @@
                                     </div>
                                     <button onclick="App.showFullscreen('${entry.id}')" class="text-ao hover:text-white bg-ao/10 hover:bg-ao px-2 py-1 rounded text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border border-dashed border-ao/50"><i class="fa-solid fa-expand"></i> 全螢幕</button>
                                     
-                                    <!-- 資訊列：自動推到最右側 -->
                                     <div class="ml-auto hidden sm:flex text-gray-300 text-[13px] gap-4 items-center font-sans tracking-wide">
-                                        <span class="whitespace-nowrap">最後更新: <span class="text-gray-400">${entryTimeStr}</span></span>
-                                        <span class="whitespace-nowrap">瀏覽人次: <span class="font-bold text-yellow-100">${entryViews}</span></span>
+                                        <span class="whitespace-nowrap">最後更新: <span class="text-gray-400">${timeStr}</span></span>
+                                        <span class="whitespace-nowrap bg-blue-800/80 px-2 py-0.5 rounded text-white border border-blue-600">瀏覽人次: <span class="font-bold">${viewsCount}</span></span>
                                     </div>
                                 </div>
                                 ${canEdit ? `
@@ -1178,31 +1152,14 @@
                     `;
                 }).join('');
 
-                // 啟動觀察器：當聯絡簿卡片滾動到畫面中時，才增加該則聯絡簿的觀看次數
-                setTimeout(() => {
-                    const observer = new IntersectionObserver((entries, obs) => {
-                        entries.forEach(change => {
-                            if (change.isIntersecting) {
-                                const id = change.target.getAttribute('data-entry-id');
-                                const viewedKey = 'entry_viewed_' + id;
-                                // 確保同一個瀏覽器 session (無痕或重開瀏覽器前) 內，每一篇只會+1次，避免重複灌水
-                                if (!sessionStorage.getItem(viewedKey)) {
-                                    sessionStorage.setItem(viewedKey, 'true');
-                                    const entryData = State.entries.find(e => e.id === id);
-                                    if (entryData) {
-                                        API.updateDoc('entries', id, { views: (entryData.views || 0) + 1 }).catch(()=>{});
-                                    }
-                                }
-                                // 紀錄過後就取消觀察這則聯絡簿，節省效能
-                                obs.unobserve(change.target);
-                            }
-                        });
-                    }, { threshold: 0.2 });
-                    
-                    document.querySelectorAll('.entry-card').forEach(card => observer.observe(card));
-                }, 100);
+                // 觸發單篇聯絡簿的曝光計數
+                setTimeout(App.setupIntersectionObserver, 100);
             },
+            
             showFullscreen: (id) => {
+                State.currentFsId = id; 
+                const isVertical = State.isFullscreenVertical;
+
                 const baseEntry = State.entries.find(e => e.id === id);
                 if(!baseEntry) return;
 
@@ -1215,11 +1172,13 @@
 
                 const todayEntries = State.entries.filter(e => e.date === baseDateStr);
                 const tomorrowEntries = State.entries.filter(e => e.date === nextDateStr);
+                
+                const isSingle = tomorrowEntries.length === 0;
 
                 const renderFsSection = (title, entries) => {
                     if (entries.length === 0) {
                         return `
-                            <div class="bg-black/10 rounded-2xl shadow-sm p-6 md:p-8 border-2 border-dashed border-white/20 h-full flex flex-col">
+                            <div class="bg-black/10 rounded-2xl shadow-sm p-6 md:p-8 border-2 border-dashed ${isVertical ? 'border-white/20' : 'border-ao/50'} h-full flex flex-col">
                                 <div class="text-xl md:text-2xl text-gray-400 font-bold font-serif tracking-tight mb-5 pb-4 border-b-2 border-dashed border-white/10 flex items-center gap-2">
                                     <i class="fa-regular fa-calendar"></i> ${title}
                                 </div>
@@ -1236,30 +1195,64 @@
                         (entry.tags || []).forEach(tagId => {
                             const t = State.tags.find(x => x.id === tagId);
                             if(t && !entry.content.includes(`【${t.name}】`)) {
-                                legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-2 relative -top-[2px]" style="background-color: ${t.color}; font-size: 0.6em; padding: 6px 12px; color: #ffffff !important;">${UI.escapeHtml(t.name)}</span>`;
+                                if (isVertical) {
+                                    legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mb-2" style="background-color: ${t.color}; font-size: 0.6em; padding: 6px 12px; color: #ffffff !important;">${UI.escapeHtml(t.name)}</span>`;
+                                } else {
+                                    legacyTagsHtml += `<span class="tag-badge whitespace-nowrap mr-2 relative -top-[2px]" style="background-color: ${t.color}; font-size: 0.85em; padding: 4px 10px; border-radius: 6px; color: #ffffff !important;">${UI.escapeHtml(t.name)}</span>`;
+                                }
                             }
                         });
+                        
+                        if (isVertical) {
+                            return `
+                                <div class="ml-12 last:ml-0 flex flex-col h-full">
+                                    <div class="text-gray-400 text-sm md:text-base ml-4 flex items-center gap-2">
+                                        <i class="fa-solid fa-user-pen rotate-90"></i> 發布者: ${UI.escapeHtml(entry.authorName)}
+                                    </div>
+                                    <div class="text-lg md:text-2xl text-gray-200 font-sans tracking-widest" style="line-height: 2.5;">
+                                        ${legacyTagsHtml}${formattedContent}
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div class="mb-10 last:mb-0">
+                                    <div class="text-gray-400 text-xs md:text-sm mb-4 flex items-center gap-2">
+                                        <i class="fa-solid fa-user-pen"></i> 發布者: ${UI.escapeHtml(entry.authorName)}
+                                    </div>
+                                    <div class="text-xl md:text-3xl text-gray-100 font-sans" style="line-height: 1.8;">
+                                        ${legacyTagsHtml}${formattedContent}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }).join(isVertical ? '' : '<hr class="my-6 border-dashed border-ao/30">');
+
+                    if (isVertical) {
                         return `
-                            <div class="mb-10 last:mb-0">
-                                <div class="text-gray-400 text-sm md:text-base mb-3 flex items-center gap-2"><i class="fa-solid fa-user-pen"></i> 發布者: ${UI.escapeHtml(entry.authorName)}</div>
-                                <div class="text-lg md:text-2xl text-gray-200 font-sans" style="line-height: 1.8;">
-                                    ${legacyTagsHtml}${formattedContent}
+                            <div class="bg-board-card rounded-2xl shadow-xl p-6 md:p-8 border-2 border-dashed border-ao/50 relative overflow-hidden">
+                                <div class="absolute top-0 left-0 right-0 h-2 bg-ao"></div>
+                                <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-tight mb-5 pb-4 border-b-2 border-dashed border-ao/30 flex items-center gap-2 shrink-0">
+                                    <i class="fa-regular fa-calendar-check"></i> ${title}
+                                </div>
+                                <div class="vertical-text-layout" style="${isSingle ? 'height: 60vh;' : 'height: 32vh;'}">
+                                    ${contentHtml}
                                 </div>
                             </div>
                         `;
-                    }).join('<hr class="my-6 border-dashed border-white/10">');
-
-                    return `
-                        <div class="bg-board-card rounded-2xl shadow-xl p-6 md:p-8 border-2 border-dashed border-ao/50 h-full flex flex-col relative overflow-hidden">
-                            <div class="absolute top-0 left-0 right-0 h-2 bg-ao"></div>
-                            <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-tight mb-5 pb-4 border-b-2 border-dashed border-ao/30 flex items-center gap-2">
-                                <i class="fa-regular fa-calendar-check"></i> ${title}
+                    } else {
+                        // 橫式完全還原附圖設計 (黃虛線外框、單條虛線分隔、無頂部實心黃條)
+                        return `
+                            <div class="bg-[#143022] rounded-xl shadow-xl p-6 md:p-8 border-2 border-dashed border-ao h-full flex flex-col relative overflow-hidden" style="background-image: url('https://www.transparenttextures.com/patterns/black-chalk.png');">
+                                <div class="text-2xl md:text-3xl text-ao font-bold font-serif tracking-tight mb-5 pb-4 border-b border-dashed border-ao/60 flex items-center gap-2 shrink-0">
+                                    <i class="fa-regular fa-calendar-check"></i> ${title}
+                                </div>
+                                <div class="flex-grow overflow-y-auto">
+                                    ${contentHtml}
+                                </div>
                             </div>
-                            <div class="flex-grow">
-                                ${contentHtml}
-                            </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 };
 
                 const fsContainer = document.getElementById('fs-container');
@@ -1267,18 +1260,30 @@
                 const todayTitle = `${UI.toMinguo(baseDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(baseDateStr)}</span>`;
                 const tomorrowTitle = `${UI.toMinguo(nextDateStr)} <span class="text-xl md:text-2xl ml-1 font-medium opacity-90 text-yellow-100">${UI.getWeekdayStr(nextDateStr)}</span> <span class="text-lg md:text-xl text-sakura ml-2 font-normal">(明日)</span>`;
 
-                // 判斷隔天是否有聯絡簿，動態切換排版
-                if (tomorrowEntries.length === 0) {
-                    // 若隔天無資料，則改為單欄置中大版面呈現
-                    fsContainer.className = "grid grid-cols-1 max-w-5xl mx-auto gap-6 md:gap-10 items-stretch";
-                    fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries);
+                if (isVertical) {
+                    fsContainer.className = "flex flex-col max-w-5xl mx-auto gap-6 md:gap-8 items-stretch w-full";
+                    if (isSingle) {
+                        fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries);
+                    } else {
+                        fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
+                    }
                 } else {
-                    // 若有資料，則維持雙欄呈現
-                    fsContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch";
-                    fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
+                    if (isSingle) {
+                        fsContainer.className = "grid grid-cols-1 max-w-5xl mx-auto gap-6 md:gap-10 items-stretch";
+                        fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries);
+                    } else {
+                        fsContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch";
+                        fsContainer.innerHTML = renderFsSection(todayTitle, todayEntries) + renderFsSection(tomorrowTitle, tomorrowEntries);
+                    }
                 }
                 
                 UI.openModal('fullscreen-modal');
+            },
+            toggleFsLayout: () => {
+                State.isFullscreenVertical = !State.isFullscreenVertical;
+                if (State.currentFsId) {
+                    App.showFullscreen(State.currentFsId); 
+                }
             },
 
             // --- Links/Docs ---
@@ -1338,7 +1343,6 @@
             renderLinks: () => {
                 const container = document.getElementById('links-container');
                 const isAdmin = !State.isGuest && State.currentUser.role === 'admin';
-                
                 const d = new Date();
                 const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 
@@ -1354,15 +1358,13 @@
                 }
 
                 const sorted = [...visibleLinks].sort((a,b) => b.timestamp - a.timestamp);
-
                 container.innerHTML = sorted.map(link => {
                     const icon = link.type === 'document' ? 'fa-file-lines text-sakura' : 'fa-globe text-chalk-blue';
                     const isExpired = link.expireDate && link.expireDate < todayStr;
-                    
                     const linkTagsHtml = (link.tags || []).map(tagId => {
                         const t = State.tags.find(x => x.id === tagId);
                         if(!t) return '';
-                        return `<span class="tag-badge whitespace-nowrap" style="background-color: ${t.color}; color: #ffffff !important;">${UI.escapeHtml(t.name)}</span>`;
+                        return `<span class="tag-badge whitespace-nowrap" style="background-color: ${t.color}; border-radius: 6px;">${UI.escapeHtml(t.name)}</span>`;
                     }).join(' ');
 
                     return `
@@ -1414,8 +1416,8 @@
                 if(entryContainer) {
                     entryContainer.innerHTML = State.tags.map(tag => `
                         <button type="button" onclick="App.insertTagToContent('${UI.escapeHtml(tag.name)}')" class="inline-flex items-center gap-1 bg-black/30 px-2 py-1 border border-dashed border-white/20 rounded cursor-pointer hover:bg-black/50 transition shadow-sm">
-                            <span class="text-sm flex items-center gap-1 text-gray-100">
-                                <span class="w-3 h-3 rounded-full inline-block" style="background-color:${tag.color}"></span>
+                            <span class="text-sm flex items-center gap-1 text-gray-100 font-bold">
+                                <span class="w-3 h-3 rounded-sm inline-block" style="background-color:${tag.color}"></span>
                                 + ${UI.escapeHtml(tag.name)}
                             </span>
                         </button>
@@ -1426,8 +1428,8 @@
                     linkContainer.innerHTML = State.tags.map(tag => `
                         <label class="inline-flex items-center gap-1 bg-black/30 px-2 py-1 border border-dashed border-white/20 rounded cursor-pointer hover:bg-black/50">
                             <input type="checkbox" name="link-tags" value="${tag.id}" class="accent-ao">
-                            <span class="text-sm flex items-center gap-1 text-gray-100">
-                                <span class="w-3 h-3 rounded-full inline-block" style="background-color:${tag.color}"></span>
+                            <span class="text-sm flex items-center gap-1 text-gray-100 font-bold">
+                                <span class="w-3 h-3 rounded-sm inline-block" style="background-color:${tag.color}"></span>
                                 ${UI.escapeHtml(tag.name)}
                             </span>
                         </label>
@@ -1440,8 +1442,8 @@
                 container.innerHTML = State.tags.map(tag => `
                     <div class="flex justify-between items-center p-2 border border-dashed border-white/20 rounded bg-black/10">
                         <div class="flex items-center gap-2">
-                            <span class="w-4 h-4 rounded-full inline-block" style="background-color:${tag.color}"></span>
-                            <span class="text-gray-100">${UI.escapeHtml(tag.name)}</span>
+                            <span class="w-4 h-4 rounded-sm inline-block" style="background-color:${tag.color}"></span>
+                            <span class="text-white font-bold">${UI.escapeHtml(tag.name)}</span>
                         </div>
                         <button onclick="App.deleteTag('${tag.id}')" class="text-sakura hover:text-sakura-dark text-sm"><i class="fa-solid fa-trash"></i></button>
                     </div>
@@ -1453,11 +1455,11 @@
                 const tbody = document.getElementById('user-list-tbody');
                 if(!tbody) return;
                 tbody.innerHTML = State.users.map(u => `
-                    <tr class="border-b border-dashed border-white/10 hover:bg-white/5">
-                        <td class="p-2 text-gray-100">${UI.escapeHtml(u.name)}</td>
-                        <td class="p-2 text-gray-200">${UI.escapeHtml(u.account)}</td>
+                    <tr class="border-b border-dashed border-white/10 hover:bg-white/5 text-white">
+                        <td class="p-2">${UI.escapeHtml(u.name)}</td>
+                        <td class="p-2">${UI.escapeHtml(u.account)}</td>
                         <td class="p-2">
-                            <span class="px-2 py-1 rounded text-xs ${u.role === 'admin' ? 'bg-ao text-washi' : 'bg-gray-700 text-gray-200'} font-bold">
+                            <span class="px-2 py-1 rounded text-xs ${u.role === 'admin' ? 'bg-ao text-washi' : 'bg-gray-700'} font-bold">
                                 ${u.role === 'admin' ? '管理員' : '協作者'}
                             </span>
                         </td>
@@ -1470,7 +1472,6 @@
             }
         };
 
-        // Calendar Component
         window.Calendar = {
             render: () => {
                 const date = State.currentCalendarDate;
@@ -1482,7 +1483,6 @@
                 const firstDay = new Date(year, month, 1).getDay();
                 const daysInMonth = new Date(year, month + 1, 0).getDate();
                 const today = new Date();
-                const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                 
                 const grid = document.getElementById('calendar-grid');
                 let html = '';
@@ -1493,10 +1493,8 @@
                 
                 for (let i = 1; i <= daysInMonth; i++) {
                     const cellDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                    
                     const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
                     const isSelected = State.selectedDate === cellDateStr;
-                    
                     const hasEntry = State.entries.some(e => e.date === cellDateStr);
                     
                     let classes = `p-2 rounded cursor-pointer transition relative hover:bg-ao hover:text-washi `;
